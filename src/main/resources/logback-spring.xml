@@ -1,0 +1,38 @@
+<configuration>
+
+    <springProperty scope="context" name="LOGSTASH_HOST" source="logstash.host" defaultValue="localhost"/>
+    <springProperty scope="context" name="LOGSTASH_PORT" source="logstash.port" defaultValue="5000"/>
+
+    <!-- 콘솔 로그(Appender): 개발 편의를 위해 사용 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Logstash로 TCP 전송(Appender) -->
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <!-- Logstash가 띄워진 호스트/포트 (Docker Compose 상에서 'balearn_logstash' 컨테이너 이름, 포트 5000) -->
+        <destination>${LOGSTASH_HOST}:${LOGSTASH_PORT}</destination>
+
+        <!-- JSON 형식 인코더 -->
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp />
+                <logLevel />
+                <threadName />
+                <loggerName />
+                <message />
+                <stackTrace />
+                <!-- 필요하면 mdc, pattern, arguments 등 추가 가능 -->
+            </providers>
+        </encoder>
+    </appender>
+
+    <!-- Root Logger: 콘솔 + Logstash 전송 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="LOGSTASH" />
+    </root>
+
+</configuration>

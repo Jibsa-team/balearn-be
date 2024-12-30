@@ -1,0 +1,15 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: balearn
+  data:
+    redis:
+      host: ${redis.host}
+      port: ${redis.port}
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/${DATABASE_NAME}?useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver

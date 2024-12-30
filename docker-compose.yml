@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  ################################################################
+  # 1) Elasticsearch
+  ################################################################
+  balearn-es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    container_name: balearn-es
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - balearn-net
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+
+  ################################################################
+  # 2) Kibana
+  ################################################################
+  balearn-kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.2
+    container_name: balearn-kibana
+    depends_on:
+      - balearn-es
+    ports:
+      - "5601:5601"
+    networks:
+      - balearn-net
+
+  ################################################################
+  # 3) Logstash
+  ################################################################
+  balearn-logstash:
+    image: docker.elastic.co/logstash/logstash:8.10.2
+    container_name: balearn-logstash
+    depends_on:
+      - balearn-es
+    ports:
+      - "5000:5000"  # Spring Boot에서 Logstash로 로그 전송 시 사용
+    networks:
+      - balearn-net
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+
+  ################################################################
+  # 4) Redis
+  ################################################################
+  balearn-redis:
+    image: redis:latest
+    container_name: balearn-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - balearn-net
+    volumes:
+      - redis-data:/data
+    # password를 설정하고 싶다면 (Redis 6 이상):
+    # command: [ "redis-server", "--requirepass", "yourpassword" ]
+
+  ################################################################
+  # 5) Spring Boot App
+  ################################################################
+  balearn-app:
+    build: .
+    container_name: balearn-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - balearn-logstash
+      - balearn-redis
+    networks:
+      - balearn-net
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+
+    # Logstash로 로그를 전송한다면, logback-spring.xml에서
+    # <destination>balearn-logstash:5000</destination> 식으로 설정
+
+networks:
+  balearn-net:
+    driver: bridge
+
+volumes:
+  es-data:
+  redis-data:
