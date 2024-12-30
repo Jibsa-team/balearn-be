@@ -1,0 +1,14 @@
+---
+name: Configuration update
+about: 설정 변경이나 환경 설정과 관련된 이슈를 기록하는 템플릿입니다.
+title: "[SETTING]"
+labels: "⚙️Setting"
+assignees: HMWG
+
+---
+
+## ✨ 세팅할 환경
+
+<br>
+
+### 📕 레퍼런스
