@@ -29,6 +29,6 @@ abstract class BaseTimeEntity {
     @JsonSerialize(using = LocalDateTimeSerializer::class)
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     @LastModifiedDate
-    var modifiedDate: LocalDateTime? = null
+    var modifiedAt: LocalDateTime? = null
         protected set
 }
