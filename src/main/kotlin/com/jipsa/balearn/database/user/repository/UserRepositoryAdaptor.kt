@@ -3,9 +3,11 @@ package com.jipsa.balearn.database.user.repository
 import com.jipsa.balearn.database.user.entity.UserEntity
 import com.jipsa.balearn.domain.user.User
 import com.jipsa.balearn.domain.user.UserRepository
+import org.springframework.stereotype.Repository
 import kotlin.jvm.optionals.getOrNull
 
-class UserRepositoryAdaptor (
+@Repository
+class UserRepositoryAdaptor(
     private val userJPARepository: UserJPARepository
 ) : UserRepository {
     override fun save(user: User): User {

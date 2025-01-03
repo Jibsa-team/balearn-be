@@ -1,12 +1,14 @@
 package com.jipsa.balearn.domain.user
 
 import com.jipsa.balearn.domain.user.exception.CustomUserException
+import org.springframework.stereotype.Component
 
-class UserDeleter (
+@Component
+class UserDeleter(
     private val userRepository: UserRepository
 ) {
     fun delete(userId: UserId) {
-        val user = userRepository.findById(userId.value)?: throw CustomUserException.UserNotFoundException
+        val user = userRepository.findById(userId.value) ?: throw CustomUserException.UserNotFoundException
         userRepository.delete(user)
     }
 
