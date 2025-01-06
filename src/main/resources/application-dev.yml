@@ -31,4 +31,7 @@ kibana:
   host: balearn-kibana
   port: 5601
 
+frontend:
+  url: http://localhost:5173
+
 
