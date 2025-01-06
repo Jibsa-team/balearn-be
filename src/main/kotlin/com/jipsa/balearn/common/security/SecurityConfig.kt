@@ -18,12 +18,14 @@ class SecurityConfig(
     private val customOAuth2UserService: CustomOAuth2UserService,
     private val customOAuth2LoginSuccessHandler: CustomOAuth2LoginSuccessHandler,
     private val customOAuth2LoginFailureHandler: CustomOAuth2LoginFailureHandler,
-    private val jwtFilter: JwtFilter
+    private val jwtFilter: JwtFilter,
+    private val exceptionHandlerFilter: ExceptionHandlerFilter,
+    private val customAuthenticationEntryPoint: CustomAuthenticationEntryPoint,
+    private val customAccessDeniedHandler: CustomAccessDeniedHandler
 ) {
 
     private val loginUrls = arrayOf("/oauth2", "/login/oauth2/code", "/api/auth/reissue")
     private val permitUrls = arrayOf("/ws/info", "/ws", "/h2-console", "/h2-console/**")
-
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -43,6 +45,11 @@ class SecurityConfig(
                     .failureHandler(customOAuth2LoginFailureHandler)
             }
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterBefore(exceptionHandlerFilter, JwtFilter::class.java)
+            .exceptionHandling {
+                it.accessDeniedHandler(customAccessDeniedHandler)
+                it.authenticationEntryPoint(customAuthenticationEntryPoint)
+            }
             .build()
     }
 }
