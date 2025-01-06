@@ -40,7 +40,7 @@ data class UserProfileVO(
     val email: String,
 
     @Column(nullable = true, unique = true)
-    val phoneNumber: String,
+    val phoneNumber: String?,
 
     @Column(nullable = false)
     val profileImageUrl: String,

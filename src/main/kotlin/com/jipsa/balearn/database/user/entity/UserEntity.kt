@@ -3,15 +3,13 @@ package com.jipsa.balearn.database.user.entity
 import com.jipsa.balearn.database.global.BaseTimeEntity
 import com.jipsa.balearn.domain.user.User
 import com.jipsa.balearn.domain.user.UserId
-import jakarta.persistence.Embedded
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 
 @Entity
 @Table(name = "users")
 class UserEntity(
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,
 
     @Embedded
@@ -20,7 +18,7 @@ class UserEntity(
     @Embedded
     val userProvider: UserProviderVO,
 
-) : BaseTimeEntity() {
+    ) : BaseTimeEntity() {
     fun toDomain(): User {
         return User(
             id = UserId(id),

@@ -7,8 +7,8 @@ class User(
     val id: UserId,
     private var _userProfile: UserProfile,
     val userProvider: UserProvider,
-    createdAt: LocalDateTime?,
-    modifiedAt: LocalDateTime?
+    createdAt: LocalDateTime? = null,
+    modifiedAt: LocalDateTime? = null
 ) : Base(
     createdAt = createdAt,
     modifiedAt = modifiedAt
@@ -17,7 +17,7 @@ class User(
     val userProfile: UserProfile
         get() = _userProfile
 
-    fun changeProfile(userProfile: UserProfile){
+    fun changeProfile(userProfile: UserProfile) {
         this._userProfile = userProfile
     }
 
