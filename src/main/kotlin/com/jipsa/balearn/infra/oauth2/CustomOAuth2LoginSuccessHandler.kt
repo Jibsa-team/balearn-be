@@ -1,6 +1,7 @@
 package com.jipsa.balearn.infra.oauth2
 
 import com.jipsa.balearn.common.util.CookieUtil
+import com.jipsa.balearn.domain.user.TokenAppender
 import com.jipsa.balearn.domain.user.UserReader
 import com.jipsa.balearn.infra.jwt.JwtGenerator
 import jakarta.servlet.http.HttpServletRequest
@@ -16,7 +17,7 @@ class CustomOAuth2LoginSuccessHandler(
     private val frontendUrl: String,
     private val userReader: UserReader,
     private val jwtGenerator: JwtGenerator,
-    private val cookieUtil: CookieUtil
+    private val tokenAppender: TokenAppender
 ) : SimpleUrlAuthenticationSuccessHandler() {
     override fun onAuthenticationSuccess(
         request: HttpServletRequest,
@@ -33,7 +34,7 @@ class CustomOAuth2LoginSuccessHandler(
 
         val loginToken = jwtGenerator.generateLoginToken(user)
 
-        cookieUtil.addCookie(response, "loginToken", loginToken, 60)
+        tokenAppender.appendLoginToken(response, user.id, loginToken)
 
         response.sendRedirect(
             "${frontendUrl}/oauth/${

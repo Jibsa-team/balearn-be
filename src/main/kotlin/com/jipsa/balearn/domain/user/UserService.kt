@@ -1,5 +1,9 @@
 package com.jipsa.balearn.domain.user
 
+import com.jipsa.balearn.infra.jwt.JwtGenerator
+import com.jipsa.balearn.infra.jwt.JwtProvider
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Service
 
 @Service
@@ -7,7 +11,11 @@ class UserService(
     private val userAppender: UserAppender,
     private val userReader: UserReader,
     private val userUpdater: UserUpdater,
-    private val userDeleter: UserDeleter
+    private val userDeleter: UserDeleter,
+    private val jwtGenerator: JwtGenerator,
+    private val jwtProvider: JwtProvider,
+    private val tokenAppender: TokenAppender,
+    private val tokenReader: TokenReader
 ) {
     fun appendUser(user: User) {
         userAppender.append(user)
@@ -31,5 +39,14 @@ class UserService(
 
     fun deleteUser(user: User) {
         userDeleter.delete(user)
+    }
+
+    fun reissueToken(request: HttpServletRequest, response: HttpServletResponse): ReissueToken {
+        val user = userReader.read(jwtProvider.getUserIdFromToken(tokenReader.read(request)))
+        val accessToken = jwtGenerator.generateAccessToken(user)
+        val refreshToken = jwtGenerator.generateRefreshToken(user)
+        val expirationTime = jwtProvider.getExpiration(accessToken)
+        tokenAppender.appendRefreshToken(response, user.id, refreshToken)
+        return ReissueToken(accessToken, refreshToken, expirationTime)
     }
 }

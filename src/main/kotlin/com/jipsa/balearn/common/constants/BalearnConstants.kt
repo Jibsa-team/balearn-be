@@ -11,4 +11,8 @@ object BalearnConstants {
     const val BEARER: String = "Bearer "
 
     const val AUTHORIZATION_HEADER: String = "Authorization"
+
+    const val REFRESH_TOKEN: String = "refreshToken"
+
+    const val LOGIN_TOKEN: String = "loginToken"
 }

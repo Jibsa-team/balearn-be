@@ -62,7 +62,18 @@ class JwtValidator(
         validateToken(token)
         val userId = jwtProvider.getUserIdFromToken(token)
         val refreshToken = redisRepository.getValue(redisRepository.generateRefreshTokenKey(userId))
-            ?: throw CustomJwtException.JwtNotFountException
+            ?: throw CustomJwtException.JwtNotValidateException
+
+        if (refreshToken != token) {
+            throw CustomJwtException.JwtNotValidateException
+        }
+    }
+
+    fun validateLoginToken(token: String) {
+        validateToken(token)
+        val userId = jwtProvider.getUserIdFromToken(token)
+        val refreshToken = redisRepository.getValue(redisRepository.generateLoginTokenKey(userId))
+            ?: throw CustomJwtException.JwtNotValidateException
 
         if (refreshToken != token) {
             throw CustomJwtException.JwtNotValidateException

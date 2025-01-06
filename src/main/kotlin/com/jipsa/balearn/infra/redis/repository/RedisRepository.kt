@@ -14,6 +14,7 @@ class RedisRepository(
 
     companion object {
         private const val REFRESH_TOKEN_KEY_PREFIX = "refresh_token:"
+        private const val LOGIN_TOKEN_KEY_PREFIX = "login_token:"
     }
 
     fun saveValue(key: String, value: String, expirationTime: Long) {
@@ -46,5 +47,6 @@ class RedisRepository(
     }
 
     fun generateRefreshTokenKey(userId: UserId): String = "$REFRESH_TOKEN_KEY_PREFIX${userId.value}"
+    fun generateLoginTokenKey(userId: UserId): String = "$LOGIN_TOKEN_KEY_PREFIX${userId.value}"
 
 }
