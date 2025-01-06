@@ -17,13 +17,20 @@ class JwtFilter(
     private val customUserDetailsService: CustomUserDetailsService
 ) : OncePerRequestFilter() {
 
+    private val loginUrls = arrayOf("/oauth2", "/login/oauth2/code", "/api/auth/reissue")
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+        if (isExcludedUrl(request.requestURI)) {
+            filterChain.doFilter(request, response)
+        }
+
         val token = jwtValidator.resolveToken(request) ?: return filterChain.doFilter(request, response)
         jwtValidator.validateToken(token)
+        jwtValidator.isLogout(token)
         val userId = jwtProvider.getUserIdFromToken(token)
 
         val userDetails = customUserDetailsService.loadUserByUsername(userId.value.toString())
@@ -37,6 +44,10 @@ class JwtFilter(
         SecurityContextHolder.getContext().authentication = authentication
 
         filterChain.doFilter(request, response)
+    }
+
+    private fun isExcludedUrl(requestURI: String): Boolean {
+        return loginUrls.any { requestURI.startsWith(it) }
     }
 
 }

@@ -79,4 +79,9 @@ class JwtValidator(
             throw CustomJwtException.JwtNotValidateException
         }
     }
+
+    fun isLogout(accessToken: String) {
+        redisRepository.isExistValue(redisRepository.generateBlackListTokenKey(accessToken))
+            .let { if (it) throw CustomJwtException.JwtLoggedOutException }
+    }
 }

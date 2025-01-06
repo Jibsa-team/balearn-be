@@ -41,4 +41,17 @@ class TokenAppender(
             maxAge = 60
         )
     }
+
+    fun appendBlackListToken(
+        response: HttpServletResponse,
+        userId: UserId,
+        blackListToken: String,
+        expirationTime: Long
+    ) {
+        redisRepository.saveValue(
+            redisRepository.generateBlackListTokenKey(blackListToken),
+            userId.value.toString(),
+            expirationTime
+        )
+    }
 }

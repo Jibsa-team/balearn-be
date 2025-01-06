@@ -2,6 +2,8 @@ package com.jipsa.balearn.domain.user
 
 import com.jipsa.balearn.infra.jwt.JwtGenerator
 import com.jipsa.balearn.infra.jwt.JwtProvider
+import com.jipsa.balearn.infra.jwt.JwtValidator
+import com.jipsa.balearn.infra.jwt.exception.CustomJwtException
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Service
@@ -14,8 +16,10 @@ class UserService(
     private val userDeleter: UserDeleter,
     private val jwtGenerator: JwtGenerator,
     private val jwtProvider: JwtProvider,
+    private val jwtValidator: JwtValidator,
     private val tokenAppender: TokenAppender,
-    private val tokenReader: TokenReader
+    private val tokenReader: TokenReader,
+    private val tokenDeleter: TokenDeleter
 ) {
     fun appendUser(user: User) {
         userAppender.append(user)
@@ -48,5 +52,12 @@ class UserService(
         val expirationTime = jwtProvider.getExpiration(accessToken)
         tokenAppender.appendRefreshToken(response, user.id, refreshToken)
         return ReissueToken(accessToken, refreshToken, expirationTime)
+    }
+
+    fun logoutUser(response: HttpServletResponse, request: HttpServletRequest, userId: UserId) {
+        val accessToken = jwtValidator.resolveToken(request) ?: throw CustomJwtException.JwtNotFountException
+        jwtValidator.validateToken(accessToken)
+        tokenAppender.appendBlackListToken(response, userId, accessToken, jwtProvider.getExpiration(accessToken))
+        tokenDeleter.delete(response, userId)
     }
 }
