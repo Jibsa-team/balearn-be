@@ -19,7 +19,8 @@ class CustomUserDetailsService(
                 provider = user.userProvider.provider,
                 snsId = user.userProvider.providerId,
                 profileImageUrl = user.userProfile.profileImageUrl
-            )
+            ),
+            user = user
         )
     }
 }

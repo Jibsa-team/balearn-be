@@ -1,12 +1,14 @@
 package com.jipsa.balearn.infra.oauth2
 
 import com.jipsa.balearn.domain.user.AuthProvider
+import com.jipsa.balearn.domain.user.User
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.oauth2.core.user.OAuth2User
 
 class CustomOAuth2UserDetail(
-    private val oauth2Attributes: OAuth2Attributes
+    private val oauth2Attributes: OAuth2Attributes,
+    private val user: User? = null
 ) : OAuth2User, UserDetails {
     override fun getName(): String {
         return oauth2Attributes.name
@@ -32,5 +34,6 @@ class CustomOAuth2UserDetail(
     fun getProvider(): AuthProvider = oauth2Attributes.provider
     fun getSnsId(): String = oauth2Attributes.snsId
     fun getProfileImageUrl(): String = oauth2Attributes.profileImageUrl
+    fun getUser(): User? = user
 
 }
