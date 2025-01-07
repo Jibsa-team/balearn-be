@@ -15,14 +15,28 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2. 소스 코드를 서버로 전송
-      - name: Upload Source Code to Server
+      # 2. .env 파일 생성
+      - name: Set up environment variables
+        run: |
+          echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
+          echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env
+          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+          echo "GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> .env
+          echo "GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> .env
+          echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+          echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
+          echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
+
+      # 3. 소스 코드 및 .env 파일 서버로 전송
+      - name: Upload .env and Source Code to Server
         uses: appleboy/scp-action@v0.1.3
         with:
           host: ${{ secrets.GCP_INSTANCE_IP }}
           username: ${{ secrets.GCP_INSTANCE_USERNAME }}
           key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
-          source: "."
+          source: ".env ./"
           target: "~/app"
 
       # 3. 서버에서 Makefile 실행
