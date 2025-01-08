@@ -3,7 +3,7 @@ name: CI/CD for Blue/Green Deployment
 on:
   push:
     branches:
-      - develop  # main 브랜치에 푸시 시 실행
+      - develop  # develop 브랜치에 푸시 시 실행
 
 jobs:
   deploy:
@@ -15,9 +15,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2. .env 파일 생성
+      # 2. Debug: 현재 디렉토리 내용 확인
+      - name: Debug:Check current directory contents
+        run: ls -la
+
+      # 3. .env 파일 생성
       - name: Set up environment variables
         run: |
+          echo "SPRING_PROFILES_ACTIVE=${{ secrets.SPRING_PROFILES_ACTIVE }}" >> .env
+          echo "DATABASE_IP=${{ secrets.DATABASE_IP }}" >> .env
           echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
           echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env
           echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
@@ -29,7 +35,11 @@ jobs:
           echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
           echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
 
-      # 3. 소스 코드 및 .env 파일 서버로 전송
+      # 4. Debug: .env 파일 내용 확인 (민감 데이터 제외)
+      - name: Debug:Check .env content (excluding sensitive data)
+        run: cat .env | grep -v "PASSWORD\|SECRET"
+
+      # 5. 소스 코드 및 .env 파일 서버로 전송
       - name: Upload .env and Source Code to Server
         uses: appleboy/scp-action@v0.1.3
         with:
@@ -39,7 +49,7 @@ jobs:
           source: ".env ./"
           target: "~/app"
 
-      # 3. 서버에서 Makefile 실행
+      # 6. 서버에서 Makefile 실행
       - name: Deploy with Makefile
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -62,6 +72,9 @@ jobs:
 
             # Makefile을 사용해 배포
             make start-app
+
+            # 새로운 환경 상태 확인
+            curl -f http://$NEW_ENV:8080/health || { echo "$NEW_ENV is not healthy"; exit 1; }
 
             # Nginx 설정 변경
             sed -i "s|proxy_pass.*|proxy_pass http://$NEW_ENV;|" /etc/nginx/nginx.conf
