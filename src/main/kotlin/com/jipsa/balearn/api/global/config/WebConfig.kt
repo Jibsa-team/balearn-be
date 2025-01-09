@@ -12,7 +12,7 @@ class WebConfig(
 ) : WebMvcConfigurer {
     // CORS 설정
     override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/api/v1/**")
+        registry.addMapping("/**")
             .allowedOrigins(
                 "http://localhost:3000",
                 "http://localhost:5173",

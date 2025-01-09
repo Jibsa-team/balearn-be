@@ -1,8 +1,10 @@
-package com.grepp.quizy.common.exception
+package com.jipsa.balearn.common.exception
+
+import com.grepp.quizy.common.exception.BaseErrorCode
 
 abstract class CustomException(
-        val errorCode: BaseErrorCode,
-        private val sourceLayer: String? = null,
+    val errorCode: BaseErrorCode,
+    private val sourceLayer: String? = null,
 ) : RuntimeException() {
 
     val status: Int
@@ -10,7 +12,7 @@ abstract class CustomException(
 
     override val message: String
         get() =
-                sourceLayer?.let {
-                    "$it - ${errorCode.errorReason.message}"
-                } ?: errorCode.errorReason.message
+            sourceLayer?.let {
+                "$it - ${errorCode.errorReason.message}"
+            } ?: errorCode.errorReason.message
 }

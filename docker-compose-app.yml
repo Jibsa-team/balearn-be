@@ -1,58 +1,59 @@
 version: '3.8'
 
 services:
+  balearn-app-blue:
+    build: .
+    container_name: balearn-app-blue
+    ports:
+      - "8080:8080"
+    networks:
+      - balearn-net
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - GH_CLIENT_ID=${GH_CLIENT_ID}
+      - GH_CLIENT_SECRET=${GH_CLIENT_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
+
+  balearn-app-green:
+    build: .
+    container_name: balearn-app-green
+    ports:
+      - "8081:8080"
+    networks:
+      - balearn-net
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - GH_CLIENT_ID=${GH_CLIENT_ID}
+      - GH_CLIENT_SECRET=${GH_CLIENT_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
+
   nginx:
-    build:
-      context: ./nginx
-    container_name: nginx-proxy
+    image: nginx:latest
+    container_name: balearn-nginx
+    depends_on:
+      - balearn-app-blue
+      - balearn-app-green
     ports:
       - "80:80"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-    depends_on:
-      - app-blue
-      - app-green
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - balearn-net
 
-  app-blue:
-    build:
-      context: ./app
-    container_name: app-blue
-    environment:
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      - DATABASE_IP=${DATABASE_IP}
-      - DATABASE_NAME=${DATABASE_NAME}
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - GH_CLIENT_ID=${GH_CLIENT_ID}
-      - GH_CLIENT_SECRET=${GH_CLIENT_SECRET}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - JWT_SECRET=${JWT_SECRET}
-      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
-      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
-      - BACKEND_URL=${BACKEND_URL}
-      - REDIS_HOST=${REDIS_HOST}
-    ports:
-      - "8081:8080"
-
-  app-green:
-    build:
-      context: ./app
-    container_name: app-green
-    environment:
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      - DATABASE_IP=${DATABASE_IP}
-      - DATABASE_NAME=${DATABASE_NAME}
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - GH_CLIENT_ID=${GH_CLIENT_ID}
-      - GH_CLIENT_SECRET=${GH_CLIENT_SECRET}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - JWT_SECRET=${JWT_SECRET}
-      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
-      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
-      - BACKEND_URL=${BACKEND_URL}
-      - REDIS_HOST=${REDIS_HOST}
-    ports:
-      - "8082:8080"
+networks:
+  balearn-net:
+    driver: bridge

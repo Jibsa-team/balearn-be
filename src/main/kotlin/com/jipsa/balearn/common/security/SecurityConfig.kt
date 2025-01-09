@@ -33,6 +33,7 @@ class SecurityConfig(
             .csrf { it.disable() }
             .httpBasic { it.disable() }
             .formLogin { it.disable() }
+            .cors { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it.requestMatchers(*loginUrls).permitAll()
@@ -44,8 +45,8 @@ class SecurityConfig(
                     .successHandler(customOAuth2LoginSuccessHandler)
                     .failureHandler(customOAuth2LoginFailureHandler)
             }
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
-            .addFilterBefore(exceptionHandlerFilter, JwtFilter::class.java)
+            .addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterBefore(jwtFilter, exceptionHandlerFilter::class.java)
             .exceptionHandling {
                 it.accessDeniedHandler(customAccessDeniedHandler)
                 it.authenticationEntryPoint(customAuthenticationEntryPoint)

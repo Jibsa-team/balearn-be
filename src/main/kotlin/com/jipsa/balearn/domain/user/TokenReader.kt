@@ -13,14 +13,14 @@ class TokenReader(
     private val jwtValidator: JwtValidator
 ) {
     fun read(request: HttpServletRequest): String {
-        cookieUtil.getCookieValue(request, BalearnConstants.REFRESH_TOKEN)
+        cookieUtil.getCookieValue(request, BalearnConstants.LOGIN_TOKEN)
             ?.let {
-                jwtValidator.validateRefreshToken(it)
+                jwtValidator.validateLoginToken(it)
                 return it
             }
-            ?: cookieUtil.getCookieValue(request, BalearnConstants.LOGIN_TOKEN)
+            ?: cookieUtil.getCookieValue(request, BalearnConstants.REFRESH_TOKEN)
                 ?.let {
-                    jwtValidator.validateLoginToken(it)
+                    jwtValidator.validateRefreshToken(it)
                     return it
                 }
             ?: throw CustomJwtException.JwtNotFountException

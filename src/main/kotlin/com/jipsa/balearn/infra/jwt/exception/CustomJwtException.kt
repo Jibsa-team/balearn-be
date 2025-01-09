@@ -1,7 +1,6 @@
 package com.jipsa.balearn.infra.jwt.exception
 
-import com.grepp.quizy.common.exception.CustomException
-import com.grepp.quizy.user.api.global.jwt.exception.JwtErrorCode
+import com.jipsa.balearn.common.exception.CustomException
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.UnsupportedJwtException
 

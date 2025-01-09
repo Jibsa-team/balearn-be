@@ -1,4 +1,4 @@
-package com.grepp.quizy.user.api.global.jwt.exception
+package com.jipsa.balearn.infra.jwt.exception
 
 import com.grepp.quizy.common.exception.BaseErrorCode
 import com.grepp.quizy.common.exception.ErrorReason

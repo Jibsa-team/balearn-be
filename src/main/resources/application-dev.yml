@@ -15,8 +15,19 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         default_batch_fetch_size: 1000
 
+  data:
+    redis:
+      host: ${redis.host}
+      port: ${redis.port}
+
+  datasource:
+    url: jdbc:mysql://${DATABASE_IP}:3306/${DATABASE_NAME}?useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
 redis:
-  host: balearn-redis
+  host: ${REDIS_HOST}
   port: 6379
 
 logstash:
