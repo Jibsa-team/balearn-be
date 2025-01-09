@@ -3,6 +3,7 @@ package com.jipsa.balearn.infra.jwt
 import com.jipsa.balearn.domain.user.UserId
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
+import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
 import java.util.*
 import javax.crypto.SecretKey
@@ -12,6 +13,11 @@ import javax.crypto.SecretKey
 class JwtProvider(
     private val jwtProperties: JwtProperties
 ) {
+    @PostConstruct
+    fun init() {
+        println("secret: ${jwtProperties.secret}")
+    }
+
     private val secretKey: SecretKey = Keys.hmacShaKeyFor(
         Base64.getDecoder().decode(jwtProperties.secret)
     )
