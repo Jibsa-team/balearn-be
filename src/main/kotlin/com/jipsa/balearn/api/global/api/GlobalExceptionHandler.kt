@@ -1,6 +1,6 @@
 package com.jipsa.balearn.api.global.api
 
-import com.grepp.quizy.common.exception.CustomException
+import com.jipsa.balearn.common.exception.CustomException
 import com.jipsa.balearn.common.api.ApiResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory

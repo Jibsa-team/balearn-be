@@ -25,7 +25,7 @@ class JwtFilter(
         filterChain: FilterChain
     ) {
         if (isExcludedUrl(request.requestURI)) {
-            filterChain.doFilter(request, response)
+            return filterChain.doFilter(request, response)
         }
 
         val token = jwtValidator.resolveToken(request) ?: return filterChain.doFilter(request, response)
