@@ -1,63 +1,116 @@
-name: CI/CD for Blue/Green Deployment
+name: Deploy Spring Boot Application
 
 on:
   push:
-    branches:
-      - develop
+    branches: [ develop ]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCR_REGION: asia.gcr.io
+  DOCKER_IMAGE: asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/spring-app
+  VERSION: ${{ github.sha }}
+  BLUE_PORT: 8081
+  GREEN_PORT: 8082
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Build Spring Boot Application
-      run: |
-        ./gradlew bootJar
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'adopt'
 
-    - name: Log in to GCP
-      uses: google-github-actions/auth@v1
-      with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Setup Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          export_default_credentials: true
 
-    - name: Set GCP Project
-      run: |
-        gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
-        gcloud config set compute/zone ${{ secrets.GCP_COMPUTE_ZONE }}
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker ${{ env.GCR_REGION }} --quiet
 
-    - name: Build and Push Docker Images
-      run: |
-        docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/spring-boot-app:latest ./app
-        docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/nginx-proxy:latest ./nginx
-        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/spring-boot-app:latest
-        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/nginx-proxy:latest
+      - name: Build with Gradle
+        run: ./gradlew build -x test
 
-    - name: Generate .env file
-      run: |
-        echo "SPRING_PROFILES_ACTIVE=${{ secrets.SPRING_PROFILES_ACTIVE }}" >> .env
-        echo "DATABASE_IP=${{ secrets.DATABASE_IP }}" >> .env
-        echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
-        echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env
-        echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
-        echo "GH_CLIENT_ID=${{ secrets.GH_CLIENT_ID }}" >> .env
-        echo "GH_CLIENT_SECRET=${{ secrets.GH_CLIENT_SECRET }}" >> .env
-        echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-        echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-        echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
-        echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-        echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" >> .env
-        echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+      - name: Docker build & push
+        run: |
+          docker build -t ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }} .
+          docker push ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
 
-    - name: SSH into GCP and Deploy
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@be.balearn.o-r.kr << 'EOF'
-          cd /home/ubuntu/my-app
-          # Pull the latest Docker images
-          docker-compose pull
-          
-          # Deploy with Docker Compose
-          docker-compose up -d
-        EOF
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # GCP 서비스 계정 키 파일 생성
+            echo '${{ secrets.GCP_SA_KEY }}' > /tmp/gcp-key.json
+            
+            # Docker GCR 인증
+            cat /tmp/gcp-key.json | docker login -u _json_key --password-stdin ${{ env.GCR_REGION }}
+            
+            # 현재 실행 중인 컨테이너 확인
+            RUNNING_PORT=$(docker ps --filter name=spring-app -q | xargs docker inspect -f '{{range $p, $conf := .NetworkSettings.Ports}}{{(index $conf 0).HostPort}}{{end}}' 2>/dev/null)
+            
+            # 새로 배포할 포트 결정
+            if [ "$RUNNING_PORT" == "${{ env.BLUE_PORT }}" ]; then
+              TARGET_PORT=${{ env.GREEN_PORT }}
+              COLOR="green"
+            else
+              TARGET_PORT=${{ env.BLUE_PORT }}
+              COLOR="blue"
+            fi
+            
+            # 환경변수 파일 업데이트
+            echo "SPRING_PROFILES_ACTIVE=${{ secrets.SPRING_PROFILES_ACTIVE }}" >> .env
+            echo "DATABASE_IP=${{ secrets.DATABASE_IP }}" >> .env
+            echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
+            echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env
+            echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+            echo "GH_CLIENT_ID=${{ secrets.GH_CLIENT_ID }}" >> .env
+            echo "GH_CLIENT_SECRET=${{ secrets.GH_CLIENT_SECRET }}" >> .env
+            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+            echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
+            echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
+            echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" >> .env
+            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+            
+            # 새 버전 배포
+            docker-compose -f docker-compose.yml up -d --build spring-app-${COLOR}
+            
+            # 헬스체크
+            for i in {1..10}; do
+              sleep 3
+              if curl -s http://localhost:${TARGET_PORT}/actuator/health | grep "UP"; then
+                # Nginx 설정 업데이트
+                sudo cp /etc/nginx/conf.d/${COLOR}.conf /etc/nginx/conf.d/service.conf
+                sudo nginx -s reload
+            
+                # 이전 버전 종료
+                if [ ! -z "$RUNNING_PORT" ]; then
+                  docker stop $(docker ps --filter "publish=${RUNNING_PORT}" -q)
+                fi
+            
+                # 임시 파일 삭제
+                rm /tmp/gcp-key.json
+                exit 0
+              fi
+            done
+            
+            # 헬스체크 실패 시 롤백
+            docker stop $(docker ps --filter "publish=${TARGET_PORT}" -q)
+            rm /tmp/gcp-key.json
+            exit 1
