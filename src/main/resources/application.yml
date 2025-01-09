@@ -3,16 +3,6 @@ server:
 spring:
   application:
     name: balearn
-  data:
-    redis:
-      host: ${redis.host}
-      port: ${redis.port}
-
-  datasource:
-    url: jdbc:mysql://localhost:3306/${DATABASE_NAME}?useSSL=false&allowPublicKeyRetrieval=true
-    username: ${DATABASE_USER}
-    password: ${DATABASE_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
 
   security:
     oauth2:
@@ -26,8 +16,8 @@ spring:
               - email
               - profile
           github:
-            client-id: ${GITHUB_CLIENT_ID}
-            client-secret: ${GITHUB_CLIENT_SECRET}
+            client-id: ${GB_CLIENT_ID}
+            client-secret: ${GB_CLIENT_SECRET}
             redirect-uri: "http://localhost:8080/login/oauth2/code/github"
             scope:
               - read:user
@@ -39,7 +29,7 @@ spring:
             client-secret: ${KAKAO_CLIENT_SECRET}
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
-            redirect-uri: "http://localhost:8080/login/oauth2/code/kakao"
+            redirect-uri: "${BACKEND_URL}/login/oauth2/code/kakao"
             client-name: Kakao
             scope:
               - profile_nickname
