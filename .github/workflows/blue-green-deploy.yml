@@ -56,6 +56,18 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Copy configuration files
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker-compose.yml,nginx/"
+          target: "/home/${{ secrets.USERNAME }}/app"
+
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
@@ -63,14 +75,18 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # GCP 서비스 계정 키 파일 생성
-            echo '${{ secrets.GCP_SA_KEY }}' > /tmp/gcp-key.json
+            cd /home/${{ secrets.USERNAME }}/app
             
-            # Docker GCR 인증
-            cat /tmp/gcp-key.json | docker login -u _json_key --password-stdin ${{ env.GCR_REGION }}
+            # Docker 권한 설정
+            sudo usermod -aG docker $USER
+            sudo chmod 666 /var/run/docker.sock
+            
+            # GCP 인증
+            echo '${{ secrets.GCP_SA_KEY }}' > /tmp/gcp-key.json
+            cat /tmp/gcp-key.json | docker login -u _json_key --password-stdin asia.gcr.io
             
             # 현재 실행 중인 컨테이너 확인
-            RUNNING_PORT=$(docker ps --filter name=spring-app -q | xargs docker inspect -f '{{range $p, $conf := .NetworkSettings.Ports}}{{(index $conf 0).HostPort}}{{end}}' 2>/dev/null)
+            RUNNING_PORT=$(docker ps --filter name=spring-app -q | xargs -I {} docker inspect -f '{{range $p, $conf := .NetworkSettings.Ports}}{{(index $conf 0).HostPort}}{{end}}' {} 2>/dev/null || echo "")
             
             # 새로 배포할 포트 결정
             if [ "$RUNNING_PORT" == "${{ env.BLUE_PORT }}" ]; then
@@ -81,6 +97,7 @@ jobs:
               COLOR="blue"
             fi
             
+            # 환경변수 파일 생성
             # 환경변수 파일 업데이트
             echo "SPRING_PROFILES_ACTIVE=${{ secrets.SPRING_PROFILES_ACTIVE }}" >> .env
             echo "DATABASE_IP=${{ secrets.DATABASE_IP }}" >> .env
@@ -96,30 +113,35 @@ jobs:
             echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
             echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" >> .env
             echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+            echo "DOCKER_IMAGE=${{ env.DOCKER_IMAGE }}" >> .env
+            echo "VERSION=${{ env.VERSION }}" >> .env
+            
+            # 기존 컨테이너 정리
+            docker ps -aq --filter name=spring-app-${COLOR} | xargs -r docker rm -f
             
             # 새 버전 배포
-            docker-compose -f docker-compose.yml up -d --build spring-app-${COLOR}
+            docker-compose pull
+            docker-compose -f docker-compose.yml up -d spring-app-${COLOR}
             
             # 헬스체크
             for i in {1..10}; do
               sleep 3
               if curl -s http://localhost:${TARGET_PORT}/actuator/health | grep "UP"; then
-                # Nginx 설정 업데이트
-                sudo cp /etc/nginx/conf.d/${COLOR}.conf /etc/nginx/conf.d/service.conf
-                sudo nginx -s reload
+                # Nginx 컨테이너 재설정
+                docker-compose up -d nginx
             
                 # 이전 버전 종료
                 if [ ! -z "$RUNNING_PORT" ]; then
-                  docker stop $(docker ps --filter "publish=${RUNNING_PORT}" -q)
+                  docker ps -q --filter "publish=${RUNNING_PORT}" | xargs -r docker stop
                 fi
             
                 # 임시 파일 삭제
-                rm /tmp/gcp-key.json
+                rm -f /tmp/gcp-key.json
                 exit 0
               fi
             done
             
             # 헬스체크 실패 시 롤백
-            docker stop $(docker ps --filter "publish=${TARGET_PORT}" -q)
-            rm /tmp/gcp-key.json
+            docker ps -q --filter "publish=${TARGET_PORT}" | xargs -r docker stop
+            rm -f /tmp/gcp-key.json
             exit 1

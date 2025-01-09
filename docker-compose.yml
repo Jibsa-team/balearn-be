@@ -14,6 +14,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    networks:
+      balearn-net:
 
   spring-app-green:
     image: ${DOCKER_IMAGE}:${VERSION}
@@ -28,6 +30,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    networks:
+      balearn-net:
 
   nginx:
     image: nginx:latest
@@ -38,3 +42,9 @@ services:
     depends_on:
       - spring-app-blue
       - spring-app-green
+    networks:
+      balearn-net:
+
+networks:
+  balearn-net:
+    driver: bridge
