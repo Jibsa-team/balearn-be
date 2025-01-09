@@ -25,7 +25,7 @@ class SecurityConfig(
 ) {
 
     private val loginUrls = arrayOf("/oauth2", "/login/oauth2/code", "/api/auth/reissue")
-    private val permitUrls = arrayOf("/ws/info", "/ws", "/h2-console", "/h2-console/**")
+    private val permitUrls = arrayOf("/ws/info", "/ws", "/h2-console", "/h2-console/**", "/actuator/*")
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
