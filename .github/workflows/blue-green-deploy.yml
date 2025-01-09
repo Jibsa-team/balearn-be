@@ -148,6 +148,6 @@ jobs:
             
             # 헬스체크 실패 시 롤백
             echo "Health check failed. Rolling back..."
-            docker ps -q --filter "publish=${TARGET_PORT}" | xargs -r docker stop
+            #docker ps -q --filter "publish=${TARGET_PORT}" | xargs -r docker stop
             rm -f /tmp/gcp-key.json
             exit 1
