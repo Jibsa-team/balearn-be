@@ -13,6 +13,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Build Spring Boot Application
+      run: |
+        ./gradlew bootJar
+
     - name: Log in to GCP
       uses: google-github-actions/auth@v1
       with:
