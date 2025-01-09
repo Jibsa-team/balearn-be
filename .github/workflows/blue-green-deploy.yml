@@ -122,14 +122,17 @@ jobs:
             docker ps -aq --filter name=spring-app-${COLOR} | xargs -r docker rm -f
             
             # 새 버전 배포
+            echo "Deploying new version..."
             docker-compose pull
             docker-compose -f docker-compose.yml up -d spring-app-${COLOR}
             
             # 헬스체크
+            echo "Performing health check..."
             for i in {1..10}; do
               sleep 3
               if curl -s http://localhost:${TARGET_PORT}/actuator/health | grep "UP"; then
                 # Nginx 컨테이너 재설정
+                echo "Health check passed. Updating Nginx configuration..."
                 docker-compose up -d nginx
             
                 # 이전 버전 종료
@@ -144,6 +147,7 @@ jobs:
             done
             
             # 헬스체크 실패 시 롤백
+            echo "Health check failed. Rolling back..."
             docker ps -q --filter "publish=${TARGET_PORT}" | xargs -r docker stop
             rm -f /tmp/gcp-key.json
             exit 1
