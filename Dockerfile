@@ -1,17 +1,40 @@
-# Base image
-FROM openjdk:17-jdk-slim
+# Build stage
+FROM gradle:7.6.1-jdk17 AS builder
+WORKDIR /build
 
-# Set environment variables
-ENV APP_HOME=/app
+# 그래들 파일들을 먼저 복사하여 의존성을 캐시
+COPY build.gradle settings.gradle /build/
+COPY gradle /build/gradle
+RUN gradle dependencies --no-daemon
 
-# Create application directory
-WORKDIR $APP_HOME
+# 소스 복사 및 빌드
+COPY src /build/src
+RUN gradle build -x test --no-daemon
 
-# Copy JAR file into container
-COPY build/libs/*.jar app.jar
+# Runtime stage
+FROM eclipse-temurin:17-jre-focal
+WORKDIR /app
 
-# Expose the port that the application runs on
-EXPOSE 8080
+# 타임존 설정
+ENV TZ=Asia/Seoul
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# 보안을 위한 비root 유저 생성
+RUN groupadd -r spring && useradd -r -g spring spring
+
+# 실행에 필요한 파일만 복사
+COPY --from=builder /build/build/libs/*.jar app.jar
+
+# 권한 설정
+RUN chown -R spring:spring /app
+USER spring
+
+# 컨테이너 헬스체크
+HEALTHCHECK --interval=10s --timeout=3s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# 환경변수 설정
+ENV JAVA_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication -Dserver.port=8080"
+
+# 애플리케이션 실행
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar app.jar"]
