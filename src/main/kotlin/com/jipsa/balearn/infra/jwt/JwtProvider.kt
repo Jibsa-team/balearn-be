@@ -13,10 +13,6 @@ import javax.crypto.SecretKey
 class JwtProvider(
     private val jwtProperties: JwtProperties
 ) {
-    @PostConstruct
-    fun init() {
-        println("secret: ${jwtProperties.secret}")
-    }
 
     private val secretKey: SecretKey = Keys.hmacShaKeyFor(
         Base64.getDecoder().decode(jwtProperties.secret)

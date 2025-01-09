@@ -97,6 +97,9 @@ jobs:
               COLOR="blue"
             fi
             
+            # 기존 .env 파일 삭제
+            rm -f .env
+            
             # 환경변수 파일 생성
             # 환경변수 파일 업데이트
             echo "SPRING_PROFILES_ACTIVE=${{ secrets.SPRING_PROFILES_ACTIVE }}" >> .env
@@ -117,6 +120,9 @@ jobs:
             echo "VERSION=${{ env.VERSION }}" >> .env
             echo "BLUE_PORT=${{ env.BLUE_PORT }}" >> .env
             echo "GREEN_PORT=${{ env.GREEN_PORT }}" >> .env
+            
+            # Remove backslashes only from JWT_SECRET
+            sed -i '/^JWT_SECRET=/ s/\\//g' .env
             
             # 기존 컨테이너 정리
             docker ps -aq --filter name=spring-app-${COLOR} | xargs -r docker rm -f
