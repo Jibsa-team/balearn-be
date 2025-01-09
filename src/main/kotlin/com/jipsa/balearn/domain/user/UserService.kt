@@ -51,6 +51,7 @@ class UserService(
         val refreshToken = jwtGenerator.generateRefreshToken(user)
         val expirationTime = jwtProvider.getExpiration(accessToken)
         tokenAppender.appendRefreshToken(response, user.id, refreshToken)
+        tokenDeleter.deleteLoginToken(response, user.id)
         return ReissueToken(accessToken, refreshToken, expirationTime)
     }
 
@@ -58,6 +59,7 @@ class UserService(
         val accessToken = jwtValidator.resolveToken(request) ?: throw CustomJwtException.JwtNotFountException
         jwtValidator.validateToken(accessToken)
         tokenAppender.appendBlackListToken(response, userId, accessToken, jwtProvider.getExpiration(accessToken))
-        tokenDeleter.delete(response, userId)
+        tokenDeleter.deleteRefreshToken(response, userId)
+        tokenDeleter.deleteLoginToken(response, userId)
     }
 }

@@ -11,10 +11,13 @@ class TokenDeleter(
     private val redisRepository: RedisRepository,
     private val cookieUtil: CookieUtil
 ) {
-    fun delete(response: HttpServletResponse, userId: UserId) {
-        redisRepository.deleteValue(redisRepository.generateRefreshTokenKey(userId))
+    fun deleteLoginToken(response: HttpServletResponse, userId: UserId) {
         redisRepository.deleteValue(redisRepository.generateLoginTokenKey(userId))
-        cookieUtil.deleteCookie(response, BalearnConstants.REFRESH_TOKEN)
         cookieUtil.deleteCookie(response, BalearnConstants.LOGIN_TOKEN)
+    }
+
+    fun deleteRefreshToken(response: HttpServletResponse, userId: UserId) {
+        redisRepository.deleteValue(redisRepository.generateRefreshTokenKey(userId))
+        cookieUtil.deleteCookie(response, BalearnConstants.REFRESH_TOKEN)
     }
 }

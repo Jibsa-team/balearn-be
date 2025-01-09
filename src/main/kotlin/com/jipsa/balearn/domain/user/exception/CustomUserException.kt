@@ -1,6 +1,6 @@
 package com.jipsa.balearn.domain.user.exception
 
-import com.grepp.quizy.common.exception.CustomException
+import com.jipsa.balearn.common.exception.CustomException
 
 sealed class CustomUserException(errorCode: UserErrorCode) : CustomException(errorCode) {
     data object UserNotFoundException :

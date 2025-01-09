@@ -1,7 +1,6 @@
 package com.jipsa.balearn.infra.oauth2.exception
 
-import com.grepp.quizy.common.exception.CustomException
-import com.jipsa.balearn.domain.user.exception.UserErrorCode
+import com.jipsa.balearn.common.exception.CustomException
 
 sealed class CustomOAuth2Exception(errorCode: OAuth2ErrorCode) : CustomException(errorCode) {
     data object UnsupportedProviderException :
