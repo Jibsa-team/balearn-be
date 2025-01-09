@@ -1,28 +1,38 @@
 # Build stage
-FROM gradle:7.6.1-jdk17 AS builder
+FROM openjdk:17-jdk-slim AS builder
 WORKDIR /build
 
-# 그래들 파일들을 먼저 복사하여 의존성을 캐시
-COPY build.gradle.kts settings.gradle.kts /build/
-COPY gradle /build/gradle
-RUN gradle dependencies --no-daemon
+# 그래들 래퍼 및 소스 복사
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle.kts .
+COPY settings.gradle.kts .
+COPY src src
 
-# 소스 복사 및 빌드
-COPY src /build/src
-RUN gradle build -x test --no-daemon
+# gradlew 실행 권한 부여 및 의존성 설치
+RUN chmod +x ./gradlew
+RUN ./gradlew dependencies --no-daemon
+
+# 애플리케이션 빌드
+RUN ./gradlew bootJar --no-daemon
 
 # Runtime stage
-FROM eclipse-temurin:17-jre-focal
+FROM eclipse-temurin:17-jre
 WORKDIR /app
 
 # 타임존 설정
 ENV TZ=Asia/Seoul
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+# 필요한 패키지 설치
+RUN apt-get update && \
+    apt-get install -y curl && \
+    rm -rf /var/lib/apt/lists/*
+
 # 보안을 위한 비root 유저 생성
 RUN groupadd -r spring && useradd -r -g spring spring
 
-# 실행에 필요한 파일만 복사
+# 빌드된 JAR 파일 복사
 COPY --from=builder /build/build/libs/*.jar app.jar
 
 # 권한 설정
@@ -33,8 +43,13 @@ USER spring
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 \
   CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-# 환경변수 설정
-ENV JAVA_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication -Dserver.port=8080"
+# JVM 옵션 설정
+ENV JAVA_OPTS="-XX:+UseG1GC \
+               -XX:MaxGCPauseMillis=100 \
+               -XX:+UseStringDeduplication \
+               -Dserver.port=8080 \
+               -Dfile.encoding=UTF-8 \
+               -Djava.security.egd=file:/dev/./urandom"
 
 # 애플리케이션 실행
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
