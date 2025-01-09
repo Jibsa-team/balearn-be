@@ -21,7 +21,6 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -31,7 +30,9 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
+
+//    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
+//    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
     // OAuth2
     implementation("org.springframework.boot:spring-boot-starter-security")
