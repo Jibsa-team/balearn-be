@@ -3,7 +3,7 @@ FROM gradle:7.6.1-jdk17 AS builder
 WORKDIR /build
 
 # 그래들 파일들을 먼저 복사하여 의존성을 캐시
-COPY build.gradle settings.gradle /build/
+COPY build.gradle.kts settings.gradle.kts /build/
 COPY gradle /build/gradle
 RUN gradle dependencies --no-daemon
 
