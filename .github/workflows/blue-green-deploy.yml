@@ -115,6 +115,8 @@ jobs:
             echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
             echo "DOCKER_IMAGE=${{ env.DOCKER_IMAGE }}" >> .env
             echo "VERSION=${{ env.VERSION }}" >> .env
+            echo "BLUE_PORT=${{ env.BLUE_PORT }}" >> .env
+            echo "GREEN_PORT=${{ env.GREEN_PORT }}" >> .env
             
             # 기존 컨테이너 정리
             docker ps -aq --filter name=spring-app-${COLOR} | xargs -r docker rm -f
