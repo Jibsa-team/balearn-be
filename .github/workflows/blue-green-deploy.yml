@@ -136,8 +136,8 @@ jobs:
             # 헬스체크
             echo "Performing health check..."
             HEALTH_CHECK_PASSED=false
-            for i in {1..30}; do
-              echo "Health check attempt $i of 30..."
+            for i in {1..15}; do
+              echo "Health check attempt $i of 15..."
               if curl -s http://localhost:${TARGET_PORT}/actuator/health | grep -q "UP"; then
                 HEALTH_CHECK_PASSED=true
                 echo "Health check passed"
