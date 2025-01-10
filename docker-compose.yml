@@ -47,16 +47,10 @@ services:
     ports:
       - "80:80"
     volumes:
-      - /home/${USERNAME}/app/nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
       - spring-app-blue
       - spring-app-green
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD-SHELL", "nginx -t || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
     networks:
       - balearn-net
 

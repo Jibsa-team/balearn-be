@@ -177,8 +177,8 @@ jobs:
                 exit 0
               else
                 echo "Nginx configuration test failed. Rolling back..."
-                rm -f ${NGINX_CONF_DIR}/default.conf
-                ln -s ${NGINX_CONF_DIR}/${OLD_COLOR}.conf ${NGINX_CONF_DIR}/default.conf
+                rm -f ${NGINX_CONF_DIR}/conf.d/default.conf
+                ln -s ${NGINX_CONF_DIR}/${OLD_COLOR}.conf ${NGINX_CONF_DIR}/conf.d/default.conf
                 docker-compose up -d nginx
                 docker exec nginx nginx -s reload
             
