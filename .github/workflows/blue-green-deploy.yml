@@ -94,6 +94,8 @@ jobs:
               COLOR="blue"
             fi
             
+            OLD_COLOR=$([ "$COLOR" = "blue" ] && echo "green" || echo "blue")
+            
             echo "Current running port: $RUNNING_PORT"
             echo "Target deployment port: $TARGET_PORT"
             echo "Deploying to $COLOR environment"
@@ -150,14 +152,16 @@ jobs:
             if [ "$HEALTH_CHECK_PASSED" = true ]; then
               echo "Deployment successful. Updating Nginx configuration..."
             
-              # Nginx 설정 업데이트
-              NGINX_CONF_DIR="/home/${{ secrets.USERNAME }}/app/nginx"
+              # (2) Nginx 설정 업데이트 로직 수정
+              NGINX_HOME="/home/${{ secrets.USERNAME }}/app/nginx"
             
-              # 현재 active 설정 파일 심볼릭 링크 업데이트
-              rm -f ${NGINX_CONF_DIR}/conf.d/default.conf
-              cp ${NGINX_CONF_DIR}/${COLOR}.conf ${NGINX_CONF_DIR}/conf.d/default.conf
+              # default.conf 제거
+              rm -f ${NGINX_HOME}/conf.d/default.conf
             
-              # Nginx 재시작
+              # 새 active conf => default.conf
+              cp ${NGINX_HOME}/config/${COLOR}.conf ${NGINX_HOME}/conf.d/default.conf
+            
+              # Nginx 재시작 (이미 컨테이너가 있으면 up -d 하면 recreate or no changes)
               docker-compose up -d nginx
             
               # Nginx 설정 테스트
@@ -167,7 +171,6 @@ jobs:
             
                 # 이전 버전 종료
                 if [ ! -z "$RUNNING_PORT" ]; then
-                  OLD_COLOR=$([ "$COLOR" = "blue" ] && echo "green" || echo "blue")
                   echo "Stopping old $OLD_COLOR deployment on port $RUNNING_PORT"
                   docker ps -aq --filter name=spring-app-${OLD_COLOR} | xargs -r docker rm -f
                 fi
@@ -177,11 +180,14 @@ jobs:
                 exit 0
               else
                 echo "Nginx configuration test failed. Rolling back..."
-                rm -f ${NGINX_CONF_DIR}/conf.d/default.conf
-                cp ${NGINX_CONF_DIR}/${OLD_COLOR}.conf ${NGINX_CONF_DIR}/conf.d/default.conf
+            
+                # 롤백: 다시 old_color로 default.conf 복구
+                rm -f ${NGINX_HOME}/conf.d/default.conf
+                cp ${NGINX_HOME}/config/${OLD_COLOR}.conf ${NGINX_HOME}/conf.d/default.conf
                 docker-compose up -d nginx
                 docker exec nginx nginx -s reload
             
+                # 신규 버전 종료
                 docker ps -aq --filter name=spring-app-${COLOR} | xargs -r docker rm -f
                 rm -f /tmp/gcp-key.json
                 echo "Deployment failed"
