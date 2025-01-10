@@ -136,8 +136,8 @@ jobs:
             # 헬스체크
             echo "Performing health check..."
             HEALTH_CHECK_PASSED=false
-            for i in {1..10}; do
-              echo "Health check attempt $i of 10..."
+            for i in {1..30}; do
+              echo "Health check attempt $i of 30..."
               if curl -s http://localhost:${TARGET_PORT}/actuator/health | grep -q "UP"; then
                 HEALTH_CHECK_PASSED=true
                 echo "Health check passed"
@@ -148,18 +148,44 @@ jobs:
             
             if [ "$HEALTH_CHECK_PASSED" = true ]; then
               echo "Deployment successful. Updating Nginx configuration..."
+            
+              # Nginx 설정 업데이트
+              NGINX_CONF_DIR="/home/${{ secrets.USERNAME }}/app/nginx"
+            
+              # 현재 active 설정 파일 심볼릭 링크 업데이트
+              rm -f ${NGINX_CONF_DIR}/default.conf
+              ln -s ${NGINX_CONF_DIR}/${COLOR}.conf ${NGINX_CONF_DIR}/default.conf
+            
+              # Nginx 재시작
               docker-compose up -d nginx
             
-              # 이전 버전 종료 (새 버전이 정상 동작하는 것을 확인한 후)
-              if [ ! -z "$RUNNING_PORT" ]; then
-                OLD_COLOR=$([ "$COLOR" = "blue" ] && echo "green" || echo "blue")
-                echo "Stopping old $OLD_COLOR deployment on port $RUNNING_PORT"
-                docker ps -aq --filter name=spring-app-${OLD_COLOR} | xargs -r docker rm -f
-              fi
+              # Nginx 설정 테스트
+              if docker exec nginx nginx -t; then
+                docker exec nginx nginx -s reload
+                echo "Nginx configuration updated successfully"
             
-              rm -f /tmp/gcp-key.json
-              echo "Deployment completed successfully"
-              exit 0
+                # 이전 버전 종료
+                if [ ! -z "$RUNNING_PORT" ]; then
+                  OLD_COLOR=$([ "$COLOR" = "blue" ] && echo "green" || echo "blue")
+                  echo "Stopping old $OLD_COLOR deployment on port $RUNNING_PORT"
+                  docker ps -aq --filter name=spring-app-${OLD_COLOR} | xargs -r docker rm -f
+                fi
+            
+                rm -f /tmp/gcp-key.json
+                echo "Deployment completed successfully"
+                exit 0
+              else
+                echo "Nginx configuration test failed. Rolling back..."
+                rm -f ${NGINX_CONF_DIR}/default.conf
+                ln -s ${NGINX_CONF_DIR}/${OLD_COLOR}.conf ${NGINX_CONF_DIR}/default.conf
+                docker-compose up -d nginx
+                docker exec nginx nginx -s reload
+            
+                docker ps -aq --filter name=spring-app-${COLOR} | xargs -r docker rm -f
+                rm -f /tmp/gcp-key.json
+                echo "Deployment failed"
+                exit 1
+              fi
             else
               echo "Health check failed. Rolling back..."
               docker ps -aq --filter name=spring-app-${COLOR} | xargs -r docker rm -f

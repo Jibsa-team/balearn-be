@@ -3,48 +3,64 @@ version: '3.8'
 services:
   spring-app-blue:
     image: ${DOCKER_IMAGE}:${VERSION}
+    container_name: spring-app-blue
     ports:
       - "${BLUE_PORT}:8080"
     env_file:
       - .env
     environment:
       - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
     networks:
-      balearn-net:
+      - balearn-net
 
   spring-app-green:
     image: ${DOCKER_IMAGE}:${VERSION}
+    container_name: spring-app-green
     ports:
       - "${GREEN_PORT}:8080"
     env_file:
       - .env
     environment:
       - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - balearn-net
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template
+    depends_on:
+      - spring-app-blue
+      - spring-app-green
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "nginx -t || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 3
     networks:
-      balearn-net:
-
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-    depends_on:
-      - spring-app-blue
-      - spring-app-green
-    networks:
-      balearn-net:
+      - balearn-net
 
 networks:
   balearn-net:
+    name: balearn-net
     driver: bridge
