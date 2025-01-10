@@ -41,9 +41,6 @@ jobs:
         run: |
           gcloud auth configure-docker asia.gcr.io --quiet
 
-      - name: Configure Docker for GCR
-        run: gcloud auth configure-docker ${{ env.GCR_REGION }} --quiet
-
       - name: Build with Gradle
         run: ./gradlew build -x test
 
@@ -85,11 +82,11 @@ jobs:
             echo '${{ secrets.GCP_SA_KEY }}' > /tmp/gcp-key.json
             cat /tmp/gcp-key.json | docker login -u _json_key --password-stdin asia.gcr.io
             
-            # 현재 실행 중인 컨테이너 확인
-            RUNNING_PORT=$(docker ps --filter name=spring-app -q | xargs -I {} docker inspect -f '{{range $p, $conf := .NetworkSettings.Ports}}{{(index $conf 0).HostPort}}{{end}}' {} 2>/dev/null || echo "")
+            # 현재 실행 중인 컨테이너의 포트 확인
+            RUNNING_PORT=$(docker ps --filter name=spring-app --format '{{.Ports}}' | grep -oP '0.0.0.0:\K\d+' || echo "")
             
             # 새로 배포할 포트 결정
-            if [ "$RUNNING_PORT" == "${{ env.BLUE_PORT }}" ]; then
+            if [ "$RUNNING_PORT" = "${{ env.BLUE_PORT }}" ]; then
               TARGET_PORT=${{ env.GREEN_PORT }}
               COLOR="green"
             else
@@ -97,63 +94,76 @@ jobs:
               COLOR="blue"
             fi
             
-            # 기존 .env 파일 삭제
+            echo "Current running port: $RUNNING_PORT"
+            echo "Target deployment port: $TARGET_PORT"
+            echo "Deploying to $COLOR environment"
+            
+            # 기존 .env 파일 삭제 및 새로 생성
             rm -f .env
             
-            # 환경변수 파일 생성
-            # 환경변수 파일 업데이트
-            echo "SPRING_PROFILES_ACTIVE=${{ secrets.SPRING_PROFILES_ACTIVE }}" >> .env
-            echo "DATABASE_IP=${{ secrets.DATABASE_IP }}" >> .env
-            echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
-            echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env
-            echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
-            echo "GH_CLIENT_ID=${{ secrets.GH_CLIENT_ID }}" >> .env
-            echo "GH_CLIENT_SECRET=${{ secrets.GH_CLIENT_SECRET }}" >> .env
-            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-            echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
-            echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-            echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" >> .env
-            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
-            echo "DOCKER_IMAGE=${{ env.DOCKER_IMAGE }}" >> .env
-            echo "VERSION=${{ env.VERSION }}" >> .env
-            echo "BLUE_PORT=${{ env.BLUE_PORT }}" >> .env
-            echo "GREEN_PORT=${{ env.GREEN_PORT }}" >> .env
+            cat << EOF > .env
+            SPRING_PROFILES_ACTIVE=${{ secrets.SPRING_PROFILES_ACTIVE }}
+            DATABASE_IP=${{ secrets.DATABASE_IP }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_USER=${{ secrets.DATABASE_USER }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            GH_CLIENT_ID=${{ secrets.GH_CLIENT_ID }}
+            GH_CLIENT_SECRET=${{ secrets.GH_CLIENT_SECRET }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
+            KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+            BACKEND_URL=${{ secrets.BACKEND_URL }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            DOCKER_IMAGE=${{ env.DOCKER_IMAGE }}
+            VERSION=${{ env.VERSION }}
+            BLUE_PORT=${{ env.BLUE_PORT }}
+            GREEN_PORT=${{ env.GREEN_PORT }}
+            EOF
             
-            # Remove backslashes only from JWT_SECRET
+            # JWT_SECRET에서 백슬래시 제거
             sed -i '/^JWT_SECRET=/ s/\\//g' .env
             
-            # 기존 컨테이너 정리
+            # 기존 컨테이너 정리 (동일한 색상의 컨테이너만)
             docker ps -aq --filter name=spring-app-${COLOR} | xargs -r docker rm -f
             
             # 새 버전 배포
             echo "Deploying new version..."
             docker-compose pull
-            docker-compose -f docker-compose.yml up -d spring-app-${COLOR}
+            TARGET_PORT=$TARGET_PORT COLOR=$COLOR docker-compose -f docker-compose.yml up -d spring-app-${COLOR}
             
             # 헬스체크
             echo "Performing health check..."
+            HEALTH_CHECK_PASSED=false
             for i in {1..10}; do
-              sleep 3
-              if curl -s http://localhost:${TARGET_PORT}/actuator/health | grep "UP"; then
-                # Nginx 컨테이너 재설정
-                echo "Health check passed. Updating Nginx configuration..."
-                docker-compose up -d nginx
-            
-                # 이전 버전 종료
-                if [ ! -z "$RUNNING_PORT" ]; then
-                  docker ps -q --filter "publish=${RUNNING_PORT}" | xargs -r docker stop
-                fi
-            
-                # 임시 파일 삭제
-                rm -f /tmp/gcp-key.json
-                exit 0
+              echo "Health check attempt $i of 10..."
+              if curl -s http://localhost:${TARGET_PORT}/actuator/health | grep -q "UP"; then
+                HEALTH_CHECK_PASSED=true
+                echo "Health check passed"
+                break
               fi
+              sleep 3
             done
             
-            # 헬스체크 실패 시 롤백
-            echo "Health check failed. Rolling back..."
-            docker ps -q --filter "publish=${TARGET_PORT}" | xargs -r docker stop
-            rm -f /tmp/gcp-key.json
-            exit 1
+            if [ "$HEALTH_CHECK_PASSED" = true ]; then
+              echo "Deployment successful. Updating Nginx configuration..."
+              docker-compose up -d nginx
+            
+              # 이전 버전 종료 (새 버전이 정상 동작하는 것을 확인한 후)
+              if [ ! -z "$RUNNING_PORT" ]; then
+                OLD_COLOR=$([ "$COLOR" = "blue" ] && echo "green" || echo "blue")
+                echo "Stopping old $OLD_COLOR deployment on port $RUNNING_PORT"
+                docker ps -aq --filter name=spring-app-${OLD_COLOR} | xargs -r docker rm -f
+              fi
+            
+              rm -f /tmp/gcp-key.json
+              echo "Deployment completed successfully"
+              exit 0
+            else
+              echo "Health check failed. Rolling back..."
+              docker ps -aq --filter name=spring-app-${COLOR} | xargs -r docker rm -f
+              rm -f /tmp/gcp-key.json
+              echo "Deployment failed"
+              exit 1
+            fi
