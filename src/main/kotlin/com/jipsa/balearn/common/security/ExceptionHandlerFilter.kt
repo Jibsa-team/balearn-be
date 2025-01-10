@@ -34,7 +34,7 @@ class ExceptionHandlerFilter : OncePerRequestFilter() {
     ) {
         try {
             // 다음 필터로 요청 전달
-            filterChain.doFilter(request, response)
+            return filterChain.doFilter(request, response)
         } catch (e: Exception) {
             handleException(request, response, e)
         }

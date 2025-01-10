@@ -48,3 +48,7 @@ jwt:
   refresh-token-validity: 604800000  # 7일
   login-token-validity: 60000  # 1분
 
+springdoc:
+  swagger-ui:
+    path: /
+
