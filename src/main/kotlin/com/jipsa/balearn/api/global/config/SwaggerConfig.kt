@@ -14,6 +14,7 @@ class SwaggerConfig {
     @Bean
     fun openAPI(): OpenAPI {
         val securitySchemeName = "BearerAuth" // Security Scheme 이름
+        val server: Server = Server().url(System.getenv("BACKEND_URL")) // 서버 URL 설정
         return OpenAPI()
             .components(
                 io.swagger.v3.oas.models.Components()
@@ -29,6 +30,7 @@ class SwaggerConfig {
                     )
             )
             .addSecurityItem(SecurityRequirement().addList(securitySchemeName)) // Security Requirement 추가
+            .addServersItem(server)
             .info(apiInfo())
     }
 
