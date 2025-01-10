@@ -47,7 +47,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - /home/${USERNAME}/app/nginx/conf.d:/etc/nginx/conf.d
     depends_on:
       - spring-app-blue
       - spring-app-green

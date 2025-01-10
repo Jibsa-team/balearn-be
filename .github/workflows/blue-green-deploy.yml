@@ -120,6 +120,7 @@ jobs:
             VERSION=${{ env.VERSION }}
             BLUE_PORT=${{ env.BLUE_PORT }}
             GREEN_PORT=${{ env.GREEN_PORT }}
+            USERNAME=${{ secrets.USERNAME }}
             EOF
             
             # JWT_SECRET에서 백슬래시 제거
@@ -153,8 +154,8 @@ jobs:
               NGINX_CONF_DIR="/home/${{ secrets.USERNAME }}/app/nginx"
             
               # 현재 active 설정 파일 심볼릭 링크 업데이트
-              rm -f ${NGINX_CONF_DIR}/default.conf
-              ln -s ${NGINX_CONF_DIR}/${COLOR}.conf ${NGINX_CONF_DIR}/default.conf
+              rm -f ${NGINX_CONF_DIR}/conf.d/default.conf
+              ln -s ${NGINX_CONF_DIR}/${COLOR}.conf ${NGINX_CONF_DIR}/conf.d/default.conf
             
               # Nginx 재시작
               docker-compose up -d nginx
