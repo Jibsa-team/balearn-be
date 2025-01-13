@@ -1,5 +1,6 @@
 package com.jipsa.balearn.database.team_user.entity
 
+import com.jipsa.balearn.database.global.BaseTimeEntity
 import com.jipsa.balearn.database.team.entity.TeamEntity
 import com.jipsa.balearn.database.user.entity.UserEntity
 import com.jipsa.balearn.domain.team_user.TeamUser
@@ -24,12 +25,14 @@ class TeamUserEntity(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     val user: UserEntity
-) {
+) : BaseTimeEntity() {
     fun toDomain() = TeamUser(
         id = TeamUserId(id),
         _profile = profile,
         team = team.toDomain(),
         user = user.toDomain(),
+        createdAt = createdAt,
+        modifiedAt = modifiedAt
     )
 
     companion object {

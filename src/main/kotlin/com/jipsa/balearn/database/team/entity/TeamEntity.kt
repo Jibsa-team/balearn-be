@@ -3,6 +3,7 @@ package com.jipsa.balearn.database.team.entity
 import com.jipsa.balearn.database.global.BaseEntity
 import com.jipsa.balearn.domain.team.Team
 import com.jipsa.balearn.domain.team.TeamId
+import com.jipsa.balearn.domain.user.UserId
 import jakarta.persistence.*
 
 @Entity
@@ -18,7 +19,11 @@ class TeamEntity(
 ) : BaseEntity() {
     fun toDomain() = Team(
         id = TeamId(id),
-        _teamInfo = teamInfoVO.toDomain()
+        _teamInfo = teamInfoVO.toDomain(),
+        createdAt = createdAt,
+        modifiedAt = modifiedAt,
+        createdBy = createdBy?.let { UserId(it) },
+        modifiedBy = modifiedBy?.let { UserId(it) }
     )
 
     companion object {
