@@ -43,7 +43,7 @@ data class UserProfileVO(
     val phoneNumber: String?,
 
     @Column(nullable = false)
-    val profileImageUrl: String,
+    val profileImageUrl: String = "https://blog.kakaocdn.net/dn/bfZZQd/btrua3HciZ9/jSnHklZw9ekuzV8YGLZ9zK/%EC%B9%B4%ED%86%A1%20%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84%20%EC%82%AC%EC%A7%84%28%EC%97%B0%EC%B4%88%EB%A1%9Dver%29.jpg?attach=1&knm=img.jpg",
 ) {
     fun toDomain() = UserProfile(
         name = name,
