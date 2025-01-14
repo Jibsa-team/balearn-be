@@ -11,7 +11,7 @@ data class TeamInfoVO(
     @Column(nullable = false)
     val description: String,
     @Column(nullable = false)
-    val teamImageUrl: String = "https://cdn-icons-png.flaticon.com/512/718/718339.png"
+    val teamImageUrl: String = "https://cdn.balearn.o-r.kr/profile/default-team.png"
 ) {
     fun toDomain() = TeamInfo(
         name = name,
