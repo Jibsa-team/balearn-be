@@ -16,7 +16,8 @@ class WebConfig(
             .allowedOrigins(
                 "http://localhost:3000",
                 "http://localhost:5173",
-                "https://balearn.com"
+                "http://dev.balearn.o-r.kr:3000",
+                "https://balearn.o-r.kr"
             ) // 주로 프론트에서 사용하는 port 번호
             .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
             .allowedHeaders("*")
