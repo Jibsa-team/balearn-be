@@ -42,4 +42,19 @@ class TeamUser(
     fun isLeader() {
         require(this._profile.role == TeamUserRole.LEADER) { "리더만 가능합니다." }
     }
+
+    companion object {
+        fun from(team: Team, user: User, role: TeamUserRole): TeamUser {
+            return TeamUser(
+                id = TeamUserId(0),
+                _profile = TeamUserProfile(
+                    nickname = user.userProfile.name,
+                    profileImageUrl = user.userProfile.profileImageUrl,
+                    role = role
+                ),
+                team = team,
+                user = user
+            )
+        }
+    }
 }

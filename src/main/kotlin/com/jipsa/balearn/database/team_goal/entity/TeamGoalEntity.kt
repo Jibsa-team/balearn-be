@@ -19,13 +19,13 @@ class TeamGoalEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
-    val teamEntity: TeamEntity
+    val team: TeamEntity
 ) : BaseEntity() {
 
     fun toDomain() = TeamGoal(
         id = TeamGoalId(id),
         _teamGoalInfo = teamGoalInfoVO.toDomain(),
-        team = teamEntity.toDomain(),
+        team = team.toDomain(),
         createdAt = createdAt,
         modifiedAt = modifiedAt,
         createdBy = createdBy?.let { UserId(it) },
@@ -36,7 +36,7 @@ class TeamGoalEntity(
         fun from(teamGoal: TeamGoal) = TeamGoalEntity(
             id = teamGoal.id.value,
             teamGoalInfoVO = TeamGoalInfoVO.from(teamGoal.teamGoalInfo),
-            teamEntity = TeamEntity.from(teamGoal.team)
+            team = TeamEntity.from(teamGoal.team)
         )
     }
 }
