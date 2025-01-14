@@ -46,6 +46,10 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
     implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
+
+    // GCS
+    implementation("org.springframework.cloud", "spring-cloud-gcp-starter", "1.2.5.RELEASE")
+    implementation("org.springframework.cloud", "spring-cloud-gcp-storage", "1.2.5.RELEASE")
 }
 
 kotlin {
