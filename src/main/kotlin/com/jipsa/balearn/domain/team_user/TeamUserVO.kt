@@ -1,8 +1,11 @@
 package com.jipsa.balearn.domain.team_user
 
-@JvmInline
-value class TeamUserId(val value: Long)
+import jakarta.persistence.Embeddable
 
+@JvmInline
+value class TeamUserId(val value: Long = 0)
+
+@Embeddable
 data class TeamUserProfile(
     val nickname: String,
     val profileImageUrl: String,

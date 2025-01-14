@@ -6,7 +6,7 @@ import com.jipsa.balearn.domain.user.UserId
 import java.time.LocalDateTime
 
 class Notice(
-    val id: NoticeId,
+    val id: NoticeId = NoticeId(),
     val team: Team,
     private var _noticeInfo: NoticeInfo,
     createdAt: LocalDateTime? = null,

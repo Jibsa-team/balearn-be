@@ -1,7 +1,7 @@
 package com.jipsa.balearn.domain.user
 
 @JvmInline
-value class UserId(val value: Long)
+value class UserId(val value: Long = 0)
 
 data class UserProfile(
     val name: String,

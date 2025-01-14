@@ -5,7 +5,7 @@ import com.jipsa.balearn.domain.user.UserId
 import java.time.LocalDateTime
 
 class Team(
-    val id: TeamId,
+    val id: TeamId = TeamId(),
     private var _teamInfo: TeamInfo,
     createdAt: LocalDateTime? = null,
     modifiedAt: LocalDateTime? = null,

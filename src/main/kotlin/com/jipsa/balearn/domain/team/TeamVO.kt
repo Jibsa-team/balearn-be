@@ -1,7 +1,7 @@
 package com.jipsa.balearn.domain.team
 
 @JvmInline
-value class TeamId(val value: Long)
+value class TeamId(val value: Long = 0)
 
 data class TeamInfo(
     val name: String,

@@ -4,7 +4,7 @@ import com.jipsa.balearn.domain.global.Base
 import java.time.LocalDateTime
 
 class User(
-    val id: UserId,
+    val id: UserId = UserId(),
     private var _userProfile: UserProfile,
     val userProvider: UserProvider,
     createdAt: LocalDateTime? = null,
