@@ -6,6 +6,7 @@ import com.jipsa.balearn.infra.oauth2.CustomOAuth2LoginSuccessHandler
 import com.jipsa.balearn.infra.oauth2.CustomOAuth2UserService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -35,11 +36,13 @@ class SecurityConfig(
             .csrf { it.disable() }
             .httpBasic { it.disable() }
             .formLogin { it.disable() }
+            .cors { }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it.requestMatchers(*loginUrls).permitAll()
                     .requestMatchers(*permitUrls).permitAll()
                     .requestMatchers(*swaggerUrls).permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest().authenticated()
             }
             .oauth2Login { oAuth2LoginConfigurer ->

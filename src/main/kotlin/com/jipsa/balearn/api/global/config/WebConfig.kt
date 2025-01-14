@@ -17,17 +17,13 @@ class WebConfig(
                 "http://localhost:3000",
                 "http://localhost:5173",
                 "http://dev.balearn.o-r.kr:3000",
-                "https://balearn.o-r.kr"
+                "https://balearn.o-r.kr",
+                "https://be.balearn.o-r.kr",
+                "https://*.balearn.o-r.kr"
             ) // 주로 프론트에서 사용하는 port 번호
             .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
             .allowedHeaders(
-                "Content-Type",
-                "Authorization",
-                "X-Requested-With",
-                "Accept",
-                "Origin",
-                "Cache-Control",
-                "Pragma"
+                "*"
             )
             .allowCredentials(true)
             .maxAge(3600)
