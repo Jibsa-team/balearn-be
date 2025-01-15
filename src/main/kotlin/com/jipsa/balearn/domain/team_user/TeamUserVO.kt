@@ -1,11 +1,14 @@
 package com.jipsa.balearn.domain.team_user
 
+import jakarta.persistence.Column
 import jakarta.persistence.Embeddable
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 
 @JvmInline
 value class TeamUserId(val value: Long = 0)
 
-@Embeddable
+
 data class TeamUserProfile(
     val nickname: String,
     val profileImageUrl: String,

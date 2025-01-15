@@ -15,4 +15,6 @@ object BalearnConstants {
     const val REFRESH_TOKEN: String = "refreshToken"
 
     const val LOGIN_TOKEN: String = "loginToken"
+
+    const val TEAM_INVITE_TIME: Long = 1000 * 60 * 60 * 24 // 1일
 }

@@ -40,7 +40,7 @@ class TeamUser(
     }
 
     fun isLeader() {
-        require(this._profile.role == TeamUserRole.LEADER) { "리더만 가능합니다." }
+        require(this._profile.role == TeamUserRole.LEADER || this._profile.role == TeamUserRole.OWNER) { "리더만 가능합니다." }
     }
 
     companion object {
