@@ -13,17 +13,12 @@ import org.springframework.stereotype.Component
 class TeamUserAppender(
     private val teamUserRepository: TeamUserRepository,
     private val teamRepository: TeamRepository,
-    private val redisRepository: RedisRepository
+    private val redisRepository: RedisRepository,
+    private val teamUserValidator: TeamUserValidator
 ) {
     fun append(teamUser: TeamUser): TeamUser {
-        isExistTeamUser(teamUser)
+        teamUserValidator.isExistTeamUser(teamUser.team.id, teamUser.user.id)
         return teamUserRepository.save(teamUser)
-    }
-
-    private fun isExistTeamUser(teamUser: TeamUser) {
-        if (teamUserRepository.existsByTeamIdAndUserId(teamUser.team.id, teamUser.user.id)) {
-            throw CustomTeamUserException.TeamUserAlreadyExistException
-        }
     }
 
     fun join(inviteCode: String, user: User): TeamUser {

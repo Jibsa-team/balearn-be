@@ -25,10 +25,4 @@ class TeamUserReader(
         return teamUserRepository.findByTeamIdAndUserId(teamId, userId)
             ?: throw CustomTeamUserException.TeamUserNotFoundException
     }
-
-    fun validTeamUser(teamId: TeamId, userId: UserId) {
-        if (!teamUserRepository.existsByTeamIdAndUserId(teamId, userId)) {
-            throw CustomTeamUserException.TeamUserNotValidException
-        }
-    }
 }
