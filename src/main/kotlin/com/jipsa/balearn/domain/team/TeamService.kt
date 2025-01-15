@@ -94,4 +94,9 @@ class TeamService(
             notice = notice
         )
     }
+
+    @Transactional(readOnly = true)
+    fun readMyTeams(userId: UserId): List<Team> {
+        return teamUserReader.readBy(userId).let { teamUsers -> teamUsers.map { it.team } }
+    }
 }
