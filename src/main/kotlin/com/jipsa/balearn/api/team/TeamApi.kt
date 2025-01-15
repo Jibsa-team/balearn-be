@@ -3,14 +3,13 @@ package com.jipsa.balearn.api.team
 import com.jipsa.balearn.api.global.annotation.CurrentUser
 import com.jipsa.balearn.api.team.dto.TeamCreateRequest
 import com.jipsa.balearn.api.team.dto.TeamCreateResponse
+import com.jipsa.balearn.api.team.dto.TeamResponse
 import com.jipsa.balearn.common.api.ApiResponse
 import com.jipsa.balearn.common.dto.File
+import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.team.TeamService
 import com.jipsa.balearn.domain.user.User
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestPart
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
@@ -35,5 +34,13 @@ class TeamApi(
                 )
             )
         )
+    }
+
+    @GetMapping("/{teamId}")
+    fun readTeam(
+        @PathVariable teamId: Long,
+        @CurrentUser user: User
+    ): ApiResponse<TeamResponse> {
+        return ApiResponse.success(teamService.readTeam(TeamId(teamId), user.id))
     }
 }

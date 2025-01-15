@@ -1,13 +1,25 @@
 package com.jipsa.balearn.domain.team
 
+import com.jipsa.balearn.api.notice.dto.NoticeReadResponse
+import com.jipsa.balearn.api.schedule.dto.ScheduleReadResponse
+import com.jipsa.balearn.api.team.dto.TeamReadResponse
+import com.jipsa.balearn.api.team.dto.TeamResponse
+import com.jipsa.balearn.api.team_goal.dto.TeamGoalReadResponse
+import com.jipsa.balearn.api.team_user.dto.TeamUserReadResponse
 import com.jipsa.balearn.common.dto.File
+import com.jipsa.balearn.domain.mission.MissionReader
+import com.jipsa.balearn.domain.notice.NoticeReader
+import com.jipsa.balearn.domain.schedule.ScheduleReader
 import com.jipsa.balearn.domain.team_goal.TeamGoal
 import com.jipsa.balearn.domain.team_goal.TeamGoalAppender
 import com.jipsa.balearn.domain.team_goal.TeamGoalInfo
+import com.jipsa.balearn.domain.team_goal.TeamGoalReader
 import com.jipsa.balearn.domain.team_user.TeamUser
 import com.jipsa.balearn.domain.team_user.TeamUserAppender
+import com.jipsa.balearn.domain.team_user.TeamUserReader
 import com.jipsa.balearn.domain.team_user.TeamUserRole
 import com.jipsa.balearn.domain.user.User
+import com.jipsa.balearn.domain.user.UserId
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -17,7 +29,12 @@ class TeamService(
     private val teamReader: TeamReader,
     private val teamGoalAppender: TeamGoalAppender,
     private val teamUserAppender: TeamUserAppender,
-    private val teamImageAppender: TeamImageAppender
+    private val teamImageAppender: TeamImageAppender,
+    private val teamGoalReader: TeamGoalReader,
+    private val teamUserReader: TeamUserReader,
+    private val scheduleReader: ScheduleReader,
+    private val missionReader: MissionReader,
+    private val noticeReader: NoticeReader
 ) {
     @Transactional
     fun createTeam(name: String, description: String, goals: List<TeamGoalInfo>?, image: File?, user: User): Team {
@@ -57,5 +74,24 @@ class TeamService(
         )
 
         return team
+    }
+
+    @Transactional(readOnly = true)
+    fun readTeam(teamId: TeamId, userId: UserId): TeamResponse {
+        teamUserReader.validTeamUser(teamId, userId)
+        val team = TeamReadResponse.from(teamReader.read(teamId))
+        val goals = teamGoalReader.readBy(teamId).map { TeamGoalReadResponse.from(it) }
+        val users = teamUserReader.readBy(teamId).map { TeamUserReadResponse.from(it) }
+        val schedules = scheduleReader.readWeeklyScheduleBy(teamId)
+            .map { ScheduleReadResponse.from(it, missionReader.readBy(it.id)) }
+        val notice = noticeReader.readFirstBy(teamId)?.let { NoticeReadResponse.from(it) }
+
+        return TeamResponse(
+            team = team,
+            goal = goals,
+            teamUser = users,
+            weeklySchedule = schedules,
+            notice = notice
+        )
     }
 }

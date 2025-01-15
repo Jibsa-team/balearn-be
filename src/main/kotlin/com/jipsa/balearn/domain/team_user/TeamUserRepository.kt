@@ -14,4 +14,5 @@ interface TeamUserRepository {
     fun deleteByTeamId(teamId: TeamId)
     fun deleteByUserId(userId: UserId)
     fun deleteById(teamUserId: TeamUserId)
+    fun existsByTeamIdAndUserId(teamId: TeamId, userId: UserId): Boolean
 }

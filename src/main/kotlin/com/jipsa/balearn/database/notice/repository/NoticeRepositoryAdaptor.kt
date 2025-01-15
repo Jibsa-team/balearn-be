@@ -24,6 +24,10 @@ class NoticeRepositoryAdaptor(
         return noticeJpaRepository.findByTeam_Id(teamId.value).map { it.toDomain() }
     }
 
+    override fun findFirstByTeamIdOrderByCreatedAtDesc(teamId: TeamId): Notice? {
+        return noticeJpaRepository.findFirstByTeam_IdOrderByCreatedAtDesc(teamId.value)?.toDomain()
+    }
+
     override fun delete(notice: Notice) {
         noticeJpaRepository.delete(NoticeEntity.from(notice))
     }

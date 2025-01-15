@@ -41,6 +41,10 @@ class TeamUserRepositoryAdaptor(
         return teamUserJpaRepository.findByTeam_IdAndUser_Id(teamId.value, userId.value)?.toDomain()
     }
 
+    override fun existsByTeamIdAndUserId(teamId: TeamId, userId: UserId): Boolean {
+        return teamUserJpaRepository.existsByTeam_IdAndUser_Id(teamId.value, userId.value)
+    }
+
     override fun delete(teamUser: TeamUser) {
         teamUserJpaRepository.delete(TeamUserEntity.from(teamUser))
     }

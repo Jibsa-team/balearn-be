@@ -11,6 +11,8 @@ interface TeamUserJpaRepository : JpaRepository<TeamUserEntity, Long> {
 
     fun findByTeam_IdAndUser_Id(teamId: Long, userId: Long): TeamUserEntity?
 
+    fun existsByTeam_IdAndUser_Id(teamId: Long, userId: Long): Boolean
+
     fun deleteByTeam_Id(teamId: Long)
 
     fun deleteByUser_Id(userId: Long)

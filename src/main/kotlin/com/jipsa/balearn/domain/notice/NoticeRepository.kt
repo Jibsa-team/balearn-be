@@ -8,4 +8,5 @@ interface NoticeRepository {
     fun findByTeamId(teamId: TeamId): List<Notice>
     fun delete(notice: Notice)
     fun deleteById(noticeId: NoticeId)
+    fun findFirstByTeamIdOrderByCreatedAtDesc(teamId: TeamId): Notice?
 }
