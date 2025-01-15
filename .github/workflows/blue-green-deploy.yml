@@ -131,6 +131,7 @@ jobs:
             
             # JWT_SECRET에서 백슬래시 제거
             sed -i '/^JWT_SECRET=/ s/\\//g' .env
+            sed -i '/^GCS_KEY=/ s/\\//g' .env
             
             # 기존 컨테이너 정리 (동일한 색상의 컨테이너만)
             docker ps -aq --filter name=spring-app-${COLOR} | xargs -r docker rm -f
