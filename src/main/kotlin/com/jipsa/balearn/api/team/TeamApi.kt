@@ -1,10 +1,8 @@
 package com.jipsa.balearn.api.team
 
 import com.jipsa.balearn.api.global.annotation.CurrentUser
-import com.jipsa.balearn.api.team.dto.TeamCreateRequest
-import com.jipsa.balearn.api.team.dto.TeamCreateResponse
-import com.jipsa.balearn.api.team.dto.TeamReadResponse
-import com.jipsa.balearn.api.team.dto.TeamResponse
+import com.jipsa.balearn.api.team.dto.*
+import com.jipsa.balearn.api.team_user.dto.TeamUserReadResponse
 import com.jipsa.balearn.common.api.ApiResponse
 import com.jipsa.balearn.common.dto.File
 import com.jipsa.balearn.domain.team.TeamId
@@ -50,5 +48,21 @@ class TeamApi(
         @CurrentUser user: User
     ): ApiResponse<List<TeamReadResponse>> {
         return ApiResponse.success(teamService.readMyTeams(user.id).map { TeamReadResponse.from(it) })
+    }
+
+    @GetMapping("/invite/{teamId}")
+    fun inviteTeam(
+        @CurrentUser user: User,
+        @PathVariable teamId: Long,
+    ): ApiResponse<TeamInviteResponse> {
+        return ApiResponse.success(TeamInviteResponse(teamService.invite(TeamId(teamId), user.id)))
+    }
+
+    @PostMapping("/join")
+    fun joinTeam(
+        @CurrentUser user: User,
+        @RequestBody request: TeamJoinRequest
+    ): ApiResponse<TeamUserReadResponse> {
+        return ApiResponse.success(TeamUserReadResponse.from(teamService.joinTeam(request.inviteCode, user)))
     }
 }

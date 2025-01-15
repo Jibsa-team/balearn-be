@@ -30,4 +30,11 @@ sealed class CustomTeamUserException(errorCode: TeamUserErrorCode) : CustomExcep
 
         val EXCEPTION: CustomTeamUserException = TeamUserNotValidException
     }
+
+    data object InviteCodeNotValidException :
+        CustomTeamUserException(TeamUserErrorCode.INVITE_CODE_NOT_VALID) {
+        private fun readResolve(): Any = InviteCodeNotValidException
+
+        val EXCEPTION: CustomTeamUserException = InviteCodeNotValidException
+    }
 }
