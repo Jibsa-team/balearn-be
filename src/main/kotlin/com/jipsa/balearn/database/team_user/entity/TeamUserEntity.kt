@@ -16,7 +16,7 @@ class TeamUserEntity(
     val id: Long,
 
     @Embedded
-    val profile: TeamUserProfile,
+    val profile: TeamUserProfileVO,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", nullable = false)
@@ -28,7 +28,7 @@ class TeamUserEntity(
 ) : BaseTimeEntity() {
     fun toDomain() = TeamUser(
         id = TeamUserId(id),
-        _profile = profile,
+        _profile = profile.toDomain(),
         team = team.toDomain(),
         user = user.toDomain(),
         createdAt = createdAt,
@@ -38,7 +38,7 @@ class TeamUserEntity(
     companion object {
         fun from(teamUser: TeamUser) = TeamUserEntity(
             id = teamUser.id.value,
-            profile = teamUser.profile,
+            profile = TeamUserProfileVO.from(teamUser.profile),
             team = TeamEntity.from(teamUser.team),
             user = UserEntity.from(teamUser.user)
         )

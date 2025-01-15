@@ -24,7 +24,7 @@ data class TeamUserProfileVO(
     )
 
     companion object {
-        fun from(teamUserProfile: TeamUserProfile) = TeamUserProfile(
+        fun from(teamUserProfile: TeamUserProfile) = TeamUserProfileVO(
             nickname = teamUserProfile.nickname,
             profileImageUrl = teamUserProfile.profileImageUrl,
             role = teamUserProfile.role

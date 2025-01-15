@@ -14,10 +14,7 @@ import com.jipsa.balearn.domain.team_goal.TeamGoal
 import com.jipsa.balearn.domain.team_goal.TeamGoalAppender
 import com.jipsa.balearn.domain.team_goal.TeamGoalInfo
 import com.jipsa.balearn.domain.team_goal.TeamGoalReader
-import com.jipsa.balearn.domain.team_user.TeamUser
-import com.jipsa.balearn.domain.team_user.TeamUserAppender
-import com.jipsa.balearn.domain.team_user.TeamUserReader
-import com.jipsa.balearn.domain.team_user.TeamUserRole
+import com.jipsa.balearn.domain.team_user.*
 import com.jipsa.balearn.domain.user.User
 import com.jipsa.balearn.domain.user.UserId
 import org.springframework.stereotype.Service
@@ -34,7 +31,8 @@ class TeamService(
     private val teamUserReader: TeamUserReader,
     private val scheduleReader: ScheduleReader,
     private val missionReader: MissionReader,
-    private val noticeReader: NoticeReader
+    private val noticeReader: NoticeReader,
+    private val teamInviter: TeamInviter,
 ) {
     @Transactional
     fun createTeam(name: String, description: String, goals: List<TeamGoalInfo>?, image: File?, user: User): Team {
@@ -98,5 +96,15 @@ class TeamService(
     @Transactional(readOnly = true)
     fun readMyTeams(userId: UserId): List<Team> {
         return teamUserReader.readBy(userId).let { teamUsers -> teamUsers.map { it.team } }
+    }
+
+    @Transactional
+    fun invite(teamId: TeamId, userId: UserId): String {
+        return teamInviter.inviteUser(teamId, userId)
+    }
+
+    @Transactional
+    fun joinTeam(inviteCode: String, user: User): TeamUser {
+        return teamUserAppender.join(inviteCode, user)
     }
 }
