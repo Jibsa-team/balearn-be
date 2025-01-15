@@ -43,7 +43,7 @@ data class UserProfileVO(
     val phoneNumber: String?,
 
     @Column(nullable = false)
-    val profileImageUrl: String,
+    val profileImageUrl: String = "https://cdn.balearn.o-r.kr/profile/default-user.jpg",
 ) {
     fun toDomain() = UserProfile(
         name = name,

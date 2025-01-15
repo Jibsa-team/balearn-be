@@ -118,6 +118,10 @@ jobs:
             KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
             BACKEND_URL=${{ secrets.BACKEND_URL }}
             REDIS_HOST=${{ secrets.REDIS_HOST }}
+            GCP_CDN_DOMAIN=${{ secrets.GCP_CDN_DOMAIN }}
+            GCS_KEY=${{ secrets.GCS_KEY }}
+            GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
+            BUCKET_NAME=${{ secrets.BUCKET_NAME }}
             DOCKER_IMAGE=${{ env.DOCKER_IMAGE }}
             VERSION=${{ env.VERSION }}
             BLUE_PORT=${{ env.BLUE_PORT }}

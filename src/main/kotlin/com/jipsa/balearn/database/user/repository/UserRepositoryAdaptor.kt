@@ -8,7 +8,7 @@ import kotlin.jvm.optionals.getOrNull
 
 @Repository
 class UserRepositoryAdaptor(
-    private val userJPARepository: UserJPARepository
+    private val userJPARepository: UserJpaRepository
 ) : UserRepository {
     override fun save(user: User): User {
         return userJPARepository.save(UserEntity.from(user)).toDomain()
