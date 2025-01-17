@@ -33,7 +33,7 @@ class NoticeService(
         return noticeAppender.append(notice, team)
     }
 
-    fun readNotice(userId: UserId, noticeId: NoticeId) {
-        noticeReader.read(userId, noticeId)
+    fun readNotice(userId: UserId, noticeId: NoticeId): Notice {
+        return noticeReader.read(userId, noticeId)
     }
 }
