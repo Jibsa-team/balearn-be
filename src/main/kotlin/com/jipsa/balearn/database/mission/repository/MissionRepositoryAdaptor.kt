@@ -17,6 +17,10 @@ class MissionRepositoryAdaptor(
         return missionJpaRepository.save(MissionEntity.from(mission)).toDomain()
     }
 
+    override fun saveAll(missions: List<Mission>): List<Mission> {
+        return missionJpaRepository.saveAll(missions.map { MissionEntity.from(it) }).map { it.toDomain() }
+    }
+
     override fun findById(missionId: MissionId): Mission? {
         return missionJpaRepository.findById(missionId.value).getOrNull()?.toDomain()
     }

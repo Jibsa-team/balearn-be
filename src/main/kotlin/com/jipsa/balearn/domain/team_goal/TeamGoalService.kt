@@ -1,0 +1,32 @@
+package com.jipsa.balearn.domain.team_goal
+
+import com.jipsa.balearn.domain.team.TeamId
+import com.jipsa.balearn.domain.team.TeamReader
+import com.jipsa.balearn.domain.team_user.TeamUserValidator
+import com.jipsa.balearn.domain.user.UserId
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+@Service
+class TeamGoalService(
+    private val teamGoalAppender: TeamGoalAppender,
+    private val teamUserValidator: TeamUserValidator,
+    private val teamReader: TeamReader
+) {
+    @Transactional
+    fun appendTeamGoal(detail: String, color: String, teamId: TeamId, userId: UserId): TeamGoal {
+        val team = teamReader.read(teamId)
+
+        teamUserValidator.validLeader(teamId, userId)
+
+        val teamGoal = TeamGoal(
+            _teamGoalInfo = TeamGoalInfo(
+                detail = detail,
+                color = color
+            ),
+            team = team
+        )
+
+        return teamGoalAppender.append(teamGoal)
+    }
+}

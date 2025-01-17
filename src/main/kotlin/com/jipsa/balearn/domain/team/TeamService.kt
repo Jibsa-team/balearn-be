@@ -1,7 +1,7 @@
 package com.jipsa.balearn.domain.team
 
 import com.jipsa.balearn.api.notice.dto.NoticeReadResponse
-import com.jipsa.balearn.api.schedule.dto.ScheduleReadResponse
+import com.jipsa.balearn.api.schedule.dto.ScheduleResponse
 import com.jipsa.balearn.api.team.dto.TeamReadResponse
 import com.jipsa.balearn.api.team.dto.TeamResponse
 import com.jipsa.balearn.api.team_goal.dto.TeamGoalReadResponse
@@ -33,6 +33,7 @@ class TeamService(
     private val missionReader: MissionReader,
     private val noticeReader: NoticeReader,
     private val teamInviter: TeamInviter,
+    private val teamUserValidator: TeamUserValidator
 ) {
     @Transactional
     fun createTeam(name: String, description: String, goals: List<TeamGoalInfo>?, image: File?, user: User): Team {
@@ -76,12 +77,12 @@ class TeamService(
 
     @Transactional(readOnly = true)
     fun readTeam(teamId: TeamId, userId: UserId): TeamResponse {
-        teamUserReader.validTeamUser(teamId, userId)
+        teamUserValidator.validTeamUser(teamId, userId)
         val team = TeamReadResponse.from(teamReader.read(teamId))
         val goals = teamGoalReader.readBy(teamId).map { TeamGoalReadResponse.from(it) }
         val users = teamUserReader.readBy(teamId).map { TeamUserReadResponse.from(it) }
         val schedules = scheduleReader.readWeeklyScheduleBy(teamId)
-            .map { ScheduleReadResponse.from(it, missionReader.readBy(it.id)) }
+            .map { ScheduleResponse.from(it, missionReader.readBy(it.id)) }
         val notice = noticeReader.readFirstBy(teamId)?.let { NoticeReadResponse.from(it) }
 
         return TeamResponse(
