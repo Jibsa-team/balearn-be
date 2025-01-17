@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component
 class NoticeReader(
     private val noticeRepository: NoticeRepository,
     private val teamUserValidator: TeamUserValidator,
-    userValidator: TeamUserValidator
 ) {
     fun read(userId: UserId, noticeId: NoticeId): Notice {
         val notice = noticeRepository.findById(noticeId)
