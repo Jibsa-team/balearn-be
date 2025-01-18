@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 data class TeamUserReadResponse(
     val id: Long,
     val userId: Long,
+    val teamId: Long,
     val role: TeamUserRole,
     val nickname: String,
     val imgUrl: String,
@@ -18,6 +19,7 @@ data class TeamUserReadResponse(
             return TeamUserReadResponse(
                 id = teamUser.id.value,
                 userId = teamUser.user.id.value,
+                teamId = teamUser.team.id.value,
                 role = teamUser.profile.role,
                 nickname = teamUser.profile.nickname,
                 imgUrl = teamUser.profile.profileImageUrl,
