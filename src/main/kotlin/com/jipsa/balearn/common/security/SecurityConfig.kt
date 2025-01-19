@@ -50,8 +50,8 @@ class SecurityConfig(
                     .successHandler(customOAuth2LoginSuccessHandler)
                     .failureHandler(customOAuth2LoginFailureHandler)
             }
-            .addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter::class.java)
-            .addFilterBefore(jwtFilter, exceptionHandlerFilter::class.java)
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterBefore(exceptionHandlerFilter, jwtFilter::class.java)
             .exceptionHandling {
                 it.accessDeniedHandler(customAccessDeniedHandler)
                 it.authenticationEntryPoint(customAuthenticationEntryPoint)

@@ -1,8 +1,6 @@
 package com.jipsa.balearn.infra.jwt.exception
 
 import com.jipsa.balearn.common.exception.CustomException
-import io.jsonwebtoken.JwtException
-import io.jsonwebtoken.UnsupportedJwtException
 
 
 sealed class CustomJwtException(errorCode: JwtErrorCode) :
@@ -23,10 +21,10 @@ sealed class CustomJwtException(errorCode: JwtErrorCode) :
     }
 
     data object JwtNotValidateException :
-        JwtException(JwtErrorCode.TOKEN_NOT_VALIDATE.toString()) {
+        CustomJwtException(JwtErrorCode.TOKEN_NOT_VALIDATE) {
         private fun readResolve(): Any = JwtNotValidateException
 
-        val EXCEPTION: JwtException = JwtException("토큰이 유효하지 않습니다.")
+        val EXCEPTION: CustomJwtException = JwtNotValidateException
     }
 
     data object JwtUnknownException :
@@ -37,11 +35,10 @@ sealed class CustomJwtException(errorCode: JwtErrorCode) :
     }
 
     data object JwtUnsupportedException :
-        JwtException(JwtErrorCode.UNSUPPORTED_TOKEN.toString()) {
+        CustomJwtException(JwtErrorCode.UNSUPPORTED_TOKEN) {
         private fun readResolve(): Any = JwtUnsupportedException
 
-        val EXCEPTION: JwtException =
-            UnsupportedJwtException("지원하지 않는 토큰입니다.")
+        val EXCEPTION: CustomJwtException = JwtUnsupportedException
     }
 
     data object JwtLoggedOutException :
