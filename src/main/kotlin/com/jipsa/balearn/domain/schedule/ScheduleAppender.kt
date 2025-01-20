@@ -7,6 +7,8 @@ class ScheduleAppender(
     private val scheduleRepository: ScheduleRepository
 ) {
     fun append(schedule: Schedule): Schedule {
+        schedule.validateScheduleTime()
+
         return scheduleRepository.save(schedule)
     }
 }

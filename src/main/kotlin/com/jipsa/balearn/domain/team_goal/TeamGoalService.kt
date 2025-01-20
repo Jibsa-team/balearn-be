@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional
 class TeamGoalService(
     private val teamGoalAppender: TeamGoalAppender,
     private val teamUserValidator: TeamUserValidator,
+    private val teamGoalReader: TeamGoalReader,
     private val teamReader: TeamReader
 ) {
     @Transactional
@@ -28,5 +29,16 @@ class TeamGoalService(
         )
 
         return teamGoalAppender.append(teamGoal)
+    }
+
+    fun readTeamGoals(userId: UserId, teamId: TeamId): List<TeamGoal> {
+        teamUserValidator.validTeamUser(teamId, userId)
+        return teamGoalReader.readBy(teamId)
+    }
+
+    fun readTeamGoal(userId: UserId, teamGoalId: TeamGoalId): TeamGoal {
+        val teamGoal = teamGoalReader.read(teamGoalId)
+        teamUserValidator.validTeamUser(teamGoal.team.id, userId)
+        return teamGoal
     }
 }

@@ -8,7 +8,8 @@ import java.time.LocalDateTime
 data class ScheduleResponse(
     val id: Long,
     val address: String,
-    val time: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
     val topic: String,
     val mission: List<MissionReadResponse>
 ) {
@@ -17,7 +18,8 @@ data class ScheduleResponse(
             return ScheduleResponse(
                 id = schedule.id.value,
                 address = schedule.scheduleInfo.address,
-                time = schedule.scheduleInfo.time,
+                startTime = schedule.scheduleInfo.startTime,
+                endTime = schedule.scheduleInfo.endTime,
                 topic = schedule.scheduleInfo.topic,
                 mission = missions.map { MissionReadResponse.from(it) }
             )

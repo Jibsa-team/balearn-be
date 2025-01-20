@@ -9,4 +9,5 @@ interface ScheduleRepository {
     fun findByStartDateAndEndDate(teamId: TeamId, startDate: LocalDateTime, endDate: LocalDateTime): List<Schedule>
     fun delete(schedule: Schedule)
     fun deleteById(scheduleId: ScheduleId)
+    fun existByStartDateAndEndDate(teamId: TeamId, startDate: LocalDateTime, endDate: LocalDateTime): Boolean
 }

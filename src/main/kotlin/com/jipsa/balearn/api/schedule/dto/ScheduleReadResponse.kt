@@ -8,7 +8,8 @@ import java.time.LocalDateTime
 class ScheduleReadResponse(
     val id: Long,
     val address: String,
-    val time: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
     val topic: String,
 ) {
     companion object {
@@ -16,7 +17,8 @@ class ScheduleReadResponse(
             return ScheduleReadResponse(
                 id = schedule.id.value,
                 address = schedule.scheduleInfo.address,
-                time = schedule.scheduleInfo.time,
+                startTime = schedule.scheduleInfo.startTime,
+                endTime = schedule.scheduleInfo.endTime,
                 topic = schedule.scheduleInfo.topic,
             )
         }

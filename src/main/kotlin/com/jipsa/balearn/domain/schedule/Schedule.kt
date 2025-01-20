@@ -1,6 +1,7 @@
 package com.jipsa.balearn.domain.schedule
 
 import com.jipsa.balearn.domain.global.Base
+import com.jipsa.balearn.domain.schedule.exception.CustomScheduleException
 import com.jipsa.balearn.domain.team.Team
 import com.jipsa.balearn.domain.user.UserId
 import java.time.LocalDateTime
@@ -24,5 +25,11 @@ class Schedule(
 
     fun updateScheduleInfo(scheduleInfo: ScheduleInfo) {
         _scheduleInfo = scheduleInfo
+    }
+
+    fun validateScheduleTime() {
+        if (_scheduleInfo.startTime.isAfter(_scheduleInfo.endTime)) {
+            throw CustomScheduleException.ScheduleTimeInvalidException
+        }
     }
 }

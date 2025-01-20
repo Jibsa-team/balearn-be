@@ -1,10 +1,11 @@
 package com.jipsa.balearn.domain.notice
 
-import com.jipsa.balearn.domain.schedule.exception.CustomTeamException
 import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.team.TeamReader
 import com.jipsa.balearn.domain.team_user.TeamUserValidator
 import com.jipsa.balearn.domain.user.UserId
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -34,6 +35,16 @@ class NoticeService(
     }
 
     fun readNotice(userId: UserId, noticeId: NoticeId): Notice {
-        return noticeReader.read(userId, noticeId)
+        val notice = noticeReader.read(userId, noticeId)
+
+        teamUserValidator.validTeamUser(notice.team.id, userId)
+
+        return notice
+    }
+
+    fun readNoticePage(userId: UserId, teamId: TeamId, pageable: Pageable): Page<Notice> {
+        teamUserValidator.validTeamUser(teamId, userId)
+
+        return noticeReader.readBy(teamId, pageable)
     }
 }
