@@ -31,4 +31,20 @@ class TeamUserService(
             profileImageUrl = profileImgUrl
         )
     }
+
+    fun changeRole(userId: UserId, teamId: TeamId, teamUserId: TeamUserId, role: TeamUserRole): TeamUser {
+        val teamUser = teamUserReader.read(teamUserId)
+
+        teamUserValidator.validOwner(teamId, userId)
+
+        return teamUserUpdater.update(teamUser, role)
+    }
+
+    fun changeRole(userId: UserId, teamId: TeamId, role: TeamUserRole): TeamUser {
+        val teamUser = teamUserReader.readBy(teamId, userId)
+
+        teamUserValidator.validOwner(teamId, userId)
+
+        return teamUserUpdater.update(teamUser, role)
+    }
 }

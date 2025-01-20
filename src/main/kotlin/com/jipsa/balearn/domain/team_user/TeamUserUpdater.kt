@@ -15,4 +15,11 @@ class TeamUserUpdater(
 
         return teamUserRepository.save(teamUser)
     }
+
+    fun update(teamUser: TeamUser, role: TeamUserRole): TeamUser {
+
+        teamUser.changeRole(role)
+
+        return teamUserRepository.save(teamUser)
+    }
 }

@@ -9,6 +9,7 @@ import com.jipsa.balearn.common.api.ApiResponse
 import com.jipsa.balearn.common.dto.File
 import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.team_user.TeamUserId
+import com.jipsa.balearn.domain.team_user.TeamUserRole
 import com.jipsa.balearn.domain.team_user.TeamUserService
 import com.jipsa.balearn.domain.user.User
 import com.jipsa.balearn.domain.user.UserId
@@ -66,6 +67,55 @@ class TeamUserApi(
                     userId = user.id,
                     nickname = request.nickname,
                     image = image?.let { File.from(it) }
+                )
+            )
+        )
+    }
+
+    @PutMapping("/{teamId}/user/{teamUserId}")
+    fun changeUserRole(
+        @PathVariable teamId: Long,
+        @PathVariable teamUserId: Long,
+        @RequestParam role: String,
+        @CurrentUser user: User
+    ): ApiResponse<TeamUserReadResponse> {
+        val teamUserRole = when (role) {
+            "leader" -> TeamUserRole.LEADER
+            "member" -> TeamUserRole.MEMBER
+            else -> throw IllegalArgumentException("Invalid role")
+        }
+
+        return ApiResponse.success(
+            TeamUserReadResponse.from(
+                teamUserService.changeRole(
+                    teamId = TeamId(teamId),
+                    userId = user.id,
+                    teamUserId = TeamUserId(teamUserId),
+                    role = teamUserRole
+                )
+            )
+        )
+    }
+
+    @PutMapping("/{teamId}/user/{teamUserId}/owner")
+    fun changeOwner(
+        @PathVariable teamId: Long,
+        @PathVariable teamUserId: Long,
+        @CurrentUser user: User
+    ): ApiResponse<TeamUserReadResponse> {
+        teamUserService.changeRole(
+            teamId = TeamId(teamId),
+            userId = user.id,
+            teamUserId = TeamUserId(teamUserId),
+            role = TeamUserRole.OWNER
+        )
+
+        return ApiResponse.success(
+            TeamUserReadResponse.from(
+                teamUserService.changeRole(
+                    teamId = TeamId(teamId),
+                    userId = user.id,
+                    role = TeamUserRole.LEADER
                 )
             )
         )
