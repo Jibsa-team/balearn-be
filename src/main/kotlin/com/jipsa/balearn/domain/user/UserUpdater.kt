@@ -10,10 +10,10 @@ class UserUpdater(
     fun update(userId: UserId, name: String?, phoneNumber: String?, profileImgUrl: String?): User {
         val user = userRepository.findById(userId.value) ?: throw CustomUserException.UserNotFoundException
         val userProfile = UserProfile(
-            name ?: user.userProfile.name,
-            phoneNumber ?: user.userProfile.email,
-            profileImgUrl ?: user.userProfile.phoneNumber,
-            user.userProfile.profileImageUrl
+            name = name ?: user.userProfile.name,
+            email = user.userProfile.email,
+            phoneNumber = phoneNumber ?: user.userProfile.phoneNumber,
+            profileImageUrl = profileImgUrl ?: user.userProfile.profileImageUrl
         )
         user.changeProfile(userProfile)
         return userRepository.save(user)
@@ -21,10 +21,10 @@ class UserUpdater(
 
     fun update(user: User, name: String?, phoneNumber: String?, profileImgUrl: String?): User {
         val userProfile = UserProfile(
-            name ?: user.userProfile.name,
-            phoneNumber ?: user.userProfile.email,
-            profileImgUrl ?: user.userProfile.phoneNumber,
-            user.userProfile.profileImageUrl
+            name = name ?: user.userProfile.name,
+            email = user.userProfile.email,
+            phoneNumber = phoneNumber ?: user.userProfile.phoneNumber,
+            profileImageUrl = profileImgUrl ?: user.userProfile.profileImageUrl,
         )
         user.changeProfile(userProfile)
         return userRepository.save(user)
