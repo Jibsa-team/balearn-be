@@ -26,8 +26,20 @@ class ScheduleRepositoryAdaptor(
         startDate: LocalDateTime,
         endDate: LocalDateTime
     ): List<Schedule> {
-        return scheduleJpaRepository.findByTeam_IdAndScheduleInfo_TimeBetween(teamId.value, startDate, endDate)
+        return scheduleJpaRepository.findByTeam_IdAndScheduleInfo_StartTimeBetween(teamId.value, startDate, endDate)
             .map { it.toDomain() }
+    }
+
+    override fun existByStartDateAndEndDate(
+        teamId: TeamId,
+        startDate: LocalDateTime,
+        endDate: LocalDateTime
+    ): Boolean {
+        return scheduleJpaRepository.existsByTimeConflict(
+            teamId.value,
+            startDate,
+            endDate
+        )
     }
 
     override fun delete(schedule: Schedule) {
