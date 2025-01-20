@@ -8,7 +8,10 @@ import java.time.LocalDateTime
 @Embeddable
 data class ScheduleInfoVO(
     @Column(nullable = false)
-    val time: LocalDateTime,
+    val startTime: LocalDateTime,
+
+    @Column(nullable = false)
+    val endTime: LocalDateTime,
 
     @Column(nullable = false)
     val address: String,
@@ -17,14 +20,16 @@ data class ScheduleInfoVO(
     val topic: String
 ) {
     fun toDomain() = ScheduleInfo(
-        time = time,
+        startTime = startTime,
+        endTime = endTime,
         address = address,
         topic = topic
     )
 
     companion object {
         fun from(scheduleInfo: ScheduleInfo) = ScheduleInfoVO(
-            time = scheduleInfo.time,
+            startTime = scheduleInfo.startTime,
+            endTime = scheduleInfo.endTime,
             address = scheduleInfo.address,
             topic = scheduleInfo.topic
         )

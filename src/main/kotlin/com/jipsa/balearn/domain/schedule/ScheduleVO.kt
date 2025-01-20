@@ -6,7 +6,8 @@ import java.time.LocalDateTime
 value class ScheduleId(val value: Long = 0)
 
 data class ScheduleInfo(
-    val time: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
     val address: String,
     val topic: String
 )

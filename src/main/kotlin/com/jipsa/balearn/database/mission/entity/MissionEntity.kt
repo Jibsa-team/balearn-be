@@ -7,6 +7,7 @@ import com.jipsa.balearn.domain.mission.Mission
 import com.jipsa.balearn.domain.mission.MissionId
 import com.jipsa.balearn.domain.mission.MissionInfo
 import com.jipsa.balearn.domain.schedule.Schedule
+import com.jipsa.balearn.domain.user.UserId
 import jakarta.persistence.*
 
 @Entity
@@ -27,7 +28,11 @@ class MissionEntity(
         return Mission(
             id = MissionId(id),
             schedule = schedule.toDomain(),
-            _missionInfo = missionInfo.toDomain()
+            _missionInfo = missionInfo.toDomain(),
+            createdAt = createdAt,
+            modifiedAt = modifiedAt,
+            createdBy = createdBy?.let { UserId(it) },
+            modifiedBy = modifiedBy?.let { UserId(it) }
         )
     }
 

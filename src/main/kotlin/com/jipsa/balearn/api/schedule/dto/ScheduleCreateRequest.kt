@@ -7,7 +7,8 @@ import java.time.LocalDateTime
 data class ScheduleCreateRequest(
     val teamId: Long,
     val address: String,
-    val time: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
     val topic: String,
     val missions: List<MissionCreateRequest>
 ) {
