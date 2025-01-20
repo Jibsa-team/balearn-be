@@ -27,8 +27,9 @@ class GlobalExceptionHandler(
     fun handleCustomException(
         exception: CustomException,
         request: HttpServletRequest,
-    ): ResponseEntity<ApiResponse<Unit>> =
-        ResponseEntity.status(exception.status)
+    ): ResponseEntity<ApiResponse<Unit>> {
+        logger.error("CustomException: ${exception.message}", exception)
+        return ResponseEntity.status(exception.status)
             .body(
                 ApiResponse.error(
                     exception.errorCode.errorReason,
@@ -36,6 +37,8 @@ class GlobalExceptionHandler(
                     exception.message,
                 )
             )
+    }
+
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(
