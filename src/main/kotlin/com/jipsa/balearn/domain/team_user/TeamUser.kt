@@ -27,10 +27,10 @@ class TeamUser(
         )
     }
 
-    fun updateProfile(nickname: String, profileImageUrl: String) {
+    fun updateProfile(nickname: String?, profileImageUrl: String?) {
         this._profile = TeamUserProfile(
-            nickname = nickname,
-            profileImageUrl = profileImageUrl,
+            nickname = nickname ?: this._profile.nickname,
+            profileImageUrl = profileImageUrl ?: this._profile.profileImageUrl,
             role = this._profile.role
         )
     }

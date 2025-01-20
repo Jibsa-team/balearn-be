@@ -2,6 +2,7 @@ package com.jipsa.balearn.domain.user
 
 import com.jipsa.balearn.domain.global.Base
 import java.time.LocalDateTime
+import javax.swing.text.html.HTML.Tag.U
 
 class User(
     val id: UserId = UserId(),
@@ -17,8 +18,13 @@ class User(
     val userProfile: UserProfile
         get() = _userProfile
 
-    fun changeProfile(userProfile: UserProfile) {
-        this._userProfile = userProfile
+    fun changeProfile(name: String?, phoneNumber: String?, profileImgUrl: String?) {
+        this._userProfile = UserProfile(
+            name = name ?: userProfile.name,
+            email = userProfile.email,
+            phoneNumber = phoneNumber ?: userProfile.phoneNumber,
+            profileImageUrl = profileImgUrl ?: userProfile.profileImageUrl
+        )
     }
 
 }

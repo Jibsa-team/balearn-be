@@ -1,5 +1,6 @@
 package com.jipsa.balearn.domain.user
 
+import com.jipsa.balearn.common.dto.File
 import com.jipsa.balearn.infra.jwt.JwtGenerator
 import com.jipsa.balearn.infra.jwt.JwtProvider
 import com.jipsa.balearn.infra.jwt.JwtValidator
@@ -19,7 +20,8 @@ class UserService(
     private val jwtValidator: JwtValidator,
     private val tokenAppender: TokenAppender,
     private val tokenReader: TokenReader,
-    private val tokenDeleter: TokenDeleter
+    private val tokenDeleter: TokenDeleter,
+    private val userImageAppender: UserImageAppender
 ) {
     fun appendUser(user: User) {
         userAppender.append(user)
@@ -29,12 +31,9 @@ class UserService(
         return userReader.read(userId)
     }
 
-    fun updateUser(userId: UserId, name: String?, phoneNumber: String?, profileImgUrl: String?) {
-        userUpdater.update(userId, name, phoneNumber, profileImgUrl)
-    }
-
-    fun updateUser(user: User, name: String?, phoneNumber: String?, profileImgUrl: String?) {
-        userUpdater.update(user, name, phoneNumber, profileImgUrl)
+    fun updateUser(user: User, name: String?, phoneNumber: String?, image: File?): User {
+        val profileImgUrl = image?.let { userImageAppender.append(image) }
+        return userUpdater.update(user, name, phoneNumber, profileImgUrl)
     }
 
     fun deleteUser(userId: UserId) {
