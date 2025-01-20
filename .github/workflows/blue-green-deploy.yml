@@ -64,6 +64,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "docker-compose.yml,nginx/"
           target: "/home/${{ secrets.USERNAME }}/app"
+          debug: 'true'
 
       - name: Deploy
         uses: appleboy/ssh-action@master
