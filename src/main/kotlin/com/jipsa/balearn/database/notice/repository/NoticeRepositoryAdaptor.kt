@@ -5,6 +5,8 @@ import com.jipsa.balearn.domain.notice.Notice
 import com.jipsa.balearn.domain.notice.NoticeId
 import com.jipsa.balearn.domain.notice.NoticeRepository
 import com.jipsa.balearn.domain.team.TeamId
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
 import kotlin.jvm.optionals.getOrNull
 
@@ -24,8 +26,12 @@ class NoticeRepositoryAdaptor(
         return noticeJpaRepository.findByTeam_Id(teamId.value).map { it.toDomain() }
     }
 
-    override fun findFirstByTeamIdOrderByCreatedAtDesc(teamId: TeamId): Notice? {
+    override fun findFirstByTeamId(teamId: TeamId): Notice? {
         return noticeJpaRepository.findFirstByTeam_IdOrderByCreatedAtDesc(teamId.value)?.toDomain()
+    }
+
+    override fun findByTeamId(teamId: TeamId, pageable: Pageable): Page<Notice> {
+        return noticeJpaRepository.findByTeam_IdOrderByCreatedAtDesc(teamId.value, pageable).map { it.toDomain() }
     }
 
     override fun delete(notice: Notice) {
