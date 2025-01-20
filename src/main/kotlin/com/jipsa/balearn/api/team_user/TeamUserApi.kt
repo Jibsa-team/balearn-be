@@ -1,0 +1,73 @@
+package com.jipsa.balearn.api.team_user
+
+import com.jipsa.balearn.api.global.annotation.CurrentUser
+import com.jipsa.balearn.api.team_user.dto.TeamUserReadResponse
+import com.jipsa.balearn.api.team_user.dto.TeamUserUpdateRequest
+import com.jipsa.balearn.api.user.dto.UserResponse
+import com.jipsa.balearn.api.user.dto.UserUpdateRequest
+import com.jipsa.balearn.common.api.ApiResponse
+import com.jipsa.balearn.common.dto.File
+import com.jipsa.balearn.domain.team.TeamId
+import com.jipsa.balearn.domain.team_user.TeamUserId
+import com.jipsa.balearn.domain.team_user.TeamUserService
+import com.jipsa.balearn.domain.user.User
+import com.jipsa.balearn.domain.user.UserId
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
+
+@RestController
+@RequestMapping("/api/team")
+class TeamUserApi(
+    private val teamUserService: TeamUserService
+) {
+    @GetMapping("/{teamId}/me")
+    fun getMyTeamUser(
+        @CurrentUser user: User,
+        @PathVariable teamId: Long
+    ): ApiResponse<TeamUserReadResponse> {
+        return ApiResponse.success(
+            TeamUserReadResponse.from(
+                teamUserService.readTeamUser(
+                    teamId = TeamId(teamId),
+                    userId = user.id
+                )
+            )
+        )
+    }
+
+    @GetMapping("/{teamId}/user/{teamUserId}")
+    fun getTeamUser(
+        @CurrentUser user: User,
+        @PathVariable teamId: Long,
+        @PathVariable teamUserId: Long
+    ): ApiResponse<TeamUserReadResponse> {
+        return ApiResponse.success(
+            TeamUserReadResponse.from(
+                teamUserService.readTeamUser(
+                    teamId = TeamId(teamId),
+                    userId = user.id,
+                    teamUserId = TeamUserId(teamUserId)
+                )
+            )
+        )
+    }
+
+    @PutMapping("/{teamId}/me")
+    fun updateUser(
+        @RequestPart("data") request: TeamUserUpdateRequest,
+        @RequestPart("image", required = false) image: MultipartFile?,
+        @PathVariable teamId: Long,
+        @CurrentUser user: User
+    ): ApiResponse<TeamUserReadResponse> {
+        return ApiResponse.success(
+            TeamUserReadResponse.from(
+                teamUserService.updateTeamUser(
+                    teamId = TeamId(teamId),
+                    userId = user.id,
+                    nickname = request.nickname,
+                    image = image?.let { File.from(it) }
+                )
+            )
+        )
+    }
+}
