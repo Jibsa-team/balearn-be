@@ -31,11 +31,6 @@ class UserService(
         return userReader.read(userId)
     }
 
-    fun updateUser(userId: UserId, name: String?, phoneNumber: String?, image: File?): User {
-        val profileImgUrl = image?.let { userImageAppender.append(image) }
-        return userUpdater.update(userId, name, phoneNumber, profileImgUrl)
-    }
-
     fun updateUser(user: User, name: String?, phoneNumber: String?, image: File?): User {
         val profileImgUrl = image?.let { userImageAppender.append(image) }
         return userUpdater.update(user, name, phoneNumber, profileImgUrl)
