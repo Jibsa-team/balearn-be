@@ -5,19 +5,17 @@ import com.jipsa.balearn.api.team_goal.dto.TeamGoalCreateRequest
 import com.jipsa.balearn.api.team_goal.dto.TeamGoalReadResponse
 import com.jipsa.balearn.common.api.ApiResponse
 import com.jipsa.balearn.domain.team.TeamId
+import com.jipsa.balearn.domain.team_goal.TeamGoalId
 import com.jipsa.balearn.domain.team_goal.TeamGoalService
 import com.jipsa.balearn.domain.user.User
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/team/goal")
+@RequestMapping("/api/team")
 class TeamGoalApi(
     private val teamGoalService: TeamGoalService
 ) {
-    @PostMapping("/create")
+    @PostMapping("/goal/create")
     fun createTeamGoal(
         @CurrentUser user: User,
         @RequestBody request: TeamGoalCreateRequest
@@ -31,6 +29,34 @@ class TeamGoalApi(
                     teamId = TeamId(request.teamId)
                 )
             )
+        )
+    }
+
+    @GetMapping("/goal/{teamGoalId}")
+    fun getTeamGoal(
+        @CurrentUser user: User,
+        @PathVariable teamGoalId: Long
+    ): ApiResponse<TeamGoalReadResponse> {
+        return ApiResponse.success(
+            TeamGoalReadResponse.from(
+                teamGoalService.readTeamGoal(
+                    teamGoalId = TeamGoalId(teamGoalId),
+                    userId = user.id
+                )
+            )
+        )
+    }
+
+    @GetMapping("/{teamId}/goal")
+    fun getTeamGoals(
+        @CurrentUser user: User,
+        @PathVariable teamId: Long
+    ): ApiResponse<List<TeamGoalReadResponse>> {
+        return ApiResponse.success(
+            teamGoalService.readTeamGoals(
+                teamId = TeamId(teamId),
+                userId = user.id
+            ).map { TeamGoalReadResponse.from(it) }
         )
     }
 }
