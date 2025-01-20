@@ -181,6 +181,22 @@ jobs:
                   docker ps -aq --filter name=spring-app-${OLD_COLOR} | xargs -r docker rm -f
                 fi
             
+                # 배포 성공 후 사용하지 않는 Docker 이미지 삭제
+                echo "Cleaning up unused Docker images..."
+            
+                # 사용되지 않는 이미지를 삭제 (dangling 이미지)
+                docker image prune -f
+            
+                # 이전 버전 이미지 삭제
+                docker images --format '{{.Repository}}:{{.Tag}} {{.ID}}' | grep "${{ env.DOCKER_IMAGE }}" | awk '{print $2}' | while read -r IMAGE_ID; do
+                if [ "$IMAGE_ID" != "${{ env.VERSION }}" ]; then
+                echo "Removing old Docker image: $IMAGE_ID"
+                docker rmi -f "$IMAGE_ID" || echo "Failed to remove image $IMAGE_ID"
+                fi
+                done
+            
+                echo "Docker image cleanup completed."
+            
                 rm -f /tmp/gcp-key.json
                 echo "Deployment completed successfully"
                 exit 0
