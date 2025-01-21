@@ -22,7 +22,9 @@ class Mission(
     val missionInfo: MissionInfo
         get() = _missionInfo
 
-    fun updateMissionInfo(missionInfo: MissionInfo) {
-        _missionInfo = missionInfo
+    fun updateMissionInfo(detail: String?) {
+        _missionInfo = MissionInfo(
+            detail = detail ?: _missionInfo.detail
+        )
     }
 }
