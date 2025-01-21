@@ -31,8 +31,9 @@ class ScheduleApi(
                     endTime = request.endTime,
                     topic = request.topic,
                     missionInfos = request.missions.map { it.toDomain() },
-                    user.id,
-                    TeamId(request.teamId)
+                    userId = user.id,
+                    color = request.color,
+                    teamId = TeamId(request.teamId)
                 )
             )
         )

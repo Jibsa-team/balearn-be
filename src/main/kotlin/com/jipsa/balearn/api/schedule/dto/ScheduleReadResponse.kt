@@ -11,6 +11,7 @@ class ScheduleReadResponse(
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
     val topic: String,
+    val color: String
 ) {
     companion object {
         fun from(schedule: Schedule): ScheduleReadResponse {
@@ -20,6 +21,7 @@ class ScheduleReadResponse(
                 startTime = schedule.scheduleInfo.startTime,
                 endTime = schedule.scheduleInfo.endTime,
                 topic = schedule.scheduleInfo.topic,
+                color = schedule.scheduleInfo.color
             )
         }
     }

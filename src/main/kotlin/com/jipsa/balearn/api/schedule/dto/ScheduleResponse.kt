@@ -11,6 +11,7 @@ data class ScheduleResponse(
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
     val topic: String,
+    val color: String,
     val mission: List<MissionReadResponse>
 ) {
     companion object {
@@ -21,6 +22,7 @@ data class ScheduleResponse(
                 startTime = schedule.scheduleInfo.startTime,
                 endTime = schedule.scheduleInfo.endTime,
                 topic = schedule.scheduleInfo.topic,
+                color = schedule.scheduleInfo.color,
                 mission = missions.map { MissionReadResponse.from(it) }
             )
         }

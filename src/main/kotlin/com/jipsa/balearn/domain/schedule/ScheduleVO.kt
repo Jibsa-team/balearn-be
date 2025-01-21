@@ -9,5 +9,6 @@ data class ScheduleInfo(
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
     val address: String,
-    val topic: String
+    val topic: String,
+    val color: String = "#D3D3D3"
 )

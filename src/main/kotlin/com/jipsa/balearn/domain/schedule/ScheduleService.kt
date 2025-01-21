@@ -28,6 +28,7 @@ class ScheduleService(
         startTime: LocalDateTime,
         endTime: LocalDateTime,
         topic: String,
+        color: String?,
         missionInfos: List<MissionInfo>,
         userId: UserId,
         teamId: TeamId
@@ -41,7 +42,8 @@ class ScheduleService(
                 address = address,
                 startTime = startTime,
                 endTime = endTime,
-                topic = topic
+                topic = topic,
+                color = color ?: "#D3D3D3"
             ),
             team = team
         )

@@ -17,13 +17,17 @@ data class ScheduleInfoVO(
     val address: String,
 
     @Column(nullable = false)
-    val topic: String
+    val topic: String,
+
+    @Column(nullable = false)
+    val color: String = "#D3D3D3",
 ) {
     fun toDomain() = ScheduleInfo(
         startTime = startTime,
         endTime = endTime,
         address = address,
-        topic = topic
+        topic = topic,
+        color = color
     )
 
     companion object {
@@ -31,7 +35,8 @@ data class ScheduleInfoVO(
             startTime = scheduleInfo.startTime,
             endTime = scheduleInfo.endTime,
             address = scheduleInfo.address,
-            topic = scheduleInfo.topic
+            topic = scheduleInfo.topic,
+            color = scheduleInfo.color
         )
     }
 }

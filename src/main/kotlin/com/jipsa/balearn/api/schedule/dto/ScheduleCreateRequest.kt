@@ -10,6 +10,7 @@ data class ScheduleCreateRequest(
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
     val topic: String,
+    val color: String?,
     val missions: List<MissionCreateRequest>
 ) {
 }
