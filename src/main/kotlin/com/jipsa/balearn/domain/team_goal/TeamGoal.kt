@@ -22,7 +22,10 @@ class TeamGoal(
     val teamGoalInfo: TeamGoalInfo
         get() = _teamGoalInfo
 
-    fun updateInfo(teamGoalInfo: TeamGoalInfo) {
-        this._teamGoalInfo = teamGoalInfo
+    fun updateInfo(detail: String?, color: String?) {
+        this._teamGoalInfo = TeamGoalInfo(
+            detail = detail ?: teamGoalInfo.detail,
+            color = color ?: teamGoalInfo.color
+        )
     }
 }

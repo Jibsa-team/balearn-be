@@ -3,6 +3,7 @@ package com.jipsa.balearn.api.team_goal
 import com.jipsa.balearn.api.global.annotation.CurrentUser
 import com.jipsa.balearn.api.team_goal.dto.TeamGoalCreateRequest
 import com.jipsa.balearn.api.team_goal.dto.TeamGoalReadResponse
+import com.jipsa.balearn.api.team_goal.dto.TeamGoalUpdateRequest
 import com.jipsa.balearn.common.api.ApiResponse
 import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.team_goal.TeamGoalId
@@ -57,6 +58,24 @@ class TeamGoalApi(
                 teamId = TeamId(teamId),
                 userId = user.id
             ).map { TeamGoalReadResponse.from(it) }
+        )
+    }
+
+    @PutMapping("/goal/{teamGoalId}")
+    fun updateTeamGoal(
+        @CurrentUser user: User,
+        @PathVariable teamGoalId: Long,
+        @RequestBody request: TeamGoalUpdateRequest
+    ): ApiResponse<TeamGoalReadResponse> {
+        return ApiResponse.success(
+            TeamGoalReadResponse.from(
+                teamGoalService.updateTeamGoal(
+                    teamGoalId = TeamGoalId(teamGoalId),
+                    detail = request.detail,
+                    color = request.color,
+                    userId = user.id
+                )
+            )
         )
     }
 }
