@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 class NoticeReader(
     private val noticeRepository: NoticeRepository,
 ) {
-    fun read(userId: UserId, noticeId: NoticeId): Notice {
+    fun read(noticeId: NoticeId): Notice {
         return noticeRepository.findById(noticeId)
             ?: throw CustomNoticeException.NoticeNotFoundException
     }

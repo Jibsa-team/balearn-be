@@ -22,11 +22,14 @@ class Notice(
     val noticeInfo: NoticeInfo
         get() = _noticeInfo
 
-    fun updateNoticeInfo(noticeInfo: NoticeInfo) {
-        this._noticeInfo = noticeInfo
+    fun updateNoticeInfo(title: String?, detail: String?) {
+        this._noticeInfo = NoticeInfo(
+            title = title ?: this._noticeInfo.title,
+            detail = detail ?: this._noticeInfo.detail
+        )
     }
 
-    fun isOwner(userId: UserId) {
+    fun isCreator(userId: UserId) {
         require(this.createdBy == userId) { "작성자만 가능합니다." }
     }
 }

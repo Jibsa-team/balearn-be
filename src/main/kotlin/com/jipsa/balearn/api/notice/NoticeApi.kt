@@ -5,6 +5,7 @@ import com.grepp.quizy.common.dto.PageResult
 import com.jipsa.balearn.api.global.annotation.CurrentUser
 import com.jipsa.balearn.api.notice.dto.NoticeCreateRequest
 import com.jipsa.balearn.api.notice.dto.NoticeReadResponse
+import com.jipsa.balearn.api.notice.dto.NoticeUpdateRequest
 import com.jipsa.balearn.common.api.ApiResponse
 import com.jipsa.balearn.domain.notice.NoticeId
 import com.jipsa.balearn.domain.notice.NoticeService
@@ -63,6 +64,24 @@ class NoticeApi(
             )
                 .map { NoticeReadResponse.from(it) }
                 .let { PageResult.of(it.content, it.totalPages, it.hasNext()) }
+        )
+    }
+
+    @PutMapping("/{noticeId}")
+    fun updateNotice(
+        @CurrentUser user: User,
+        @PathVariable noticeId: Long,
+        @RequestBody request: NoticeUpdateRequest
+    ): ApiResponse<NoticeReadResponse> {
+        return ApiResponse.success(
+            NoticeReadResponse.from(
+                noticeService.updateNotice(
+                    user = user,
+                    noticeId = NoticeId(noticeId),
+                    title = request.title,
+                    detail = request.detail
+                )
+            )
         )
     }
 }
