@@ -23,13 +23,29 @@ class Schedule(
     val scheduleInfo: ScheduleInfo
         get() = _scheduleInfo
 
-    fun updateScheduleInfo(scheduleInfo: ScheduleInfo) {
-        _scheduleInfo = scheduleInfo
+    fun updateScheduleInfo(
+        startTime: LocalDateTime?,
+        endTime: LocalDateTime?,
+        address: String?,
+        topic: String?,
+        color: String?
+    ) {
+        _scheduleInfo = ScheduleInfo(
+            startTime = startTime ?: _scheduleInfo.startTime,
+            endTime = endTime ?: _scheduleInfo.endTime,
+            address = address ?: _scheduleInfo.address,
+            topic = topic ?: _scheduleInfo.topic,
+            color = color ?: _scheduleInfo.color
+        )
     }
 
     fun validateScheduleTime() {
         if (_scheduleInfo.startTime.isAfter(_scheduleInfo.endTime)) {
             throw CustomScheduleException.ScheduleTimeInvalidException
         }
+    }
+
+    fun isCreator(userId: UserId) {
+        require(createdBy == userId) { "작성자만 가능합니다." }
     }
 }

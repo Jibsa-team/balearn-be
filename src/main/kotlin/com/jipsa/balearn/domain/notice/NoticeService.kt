@@ -3,6 +3,7 @@ package com.jipsa.balearn.domain.notice
 import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.team.TeamReader
 import com.jipsa.balearn.domain.team_user.TeamUserValidator
+import com.jipsa.balearn.domain.user.User
 import com.jipsa.balearn.domain.user.UserId
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -14,7 +15,8 @@ class NoticeService(
     private val noticeAppender: NoticeAppender,
     private val noticeReader: NoticeReader,
     private val teamUserValidator: TeamUserValidator,
-    private val teamReader: TeamReader
+    private val teamReader: TeamReader,
+    private val noticeUpdater: NoticeUpdater
 
 ) {
     @Transactional
@@ -35,7 +37,7 @@ class NoticeService(
     }
 
     fun readNotice(userId: UserId, noticeId: NoticeId): Notice {
-        val notice = noticeReader.read(userId, noticeId)
+        val notice = noticeReader.read(noticeId)
 
         teamUserValidator.validTeamUser(notice.team.id, userId)
 
@@ -46,5 +48,19 @@ class NoticeService(
         teamUserValidator.validTeamUser(teamId, userId)
 
         return noticeReader.readBy(teamId, pageable)
+    }
+
+    @Transactional
+    fun updateNotice(user: User, noticeId: NoticeId, title: String?, detail: String?): Notice {
+        val notice = noticeReader.read(noticeId)
+
+        try {
+            teamUserValidator.validOwner(notice.team.id, user.id)
+        } catch (e: Exception) {
+            teamUserValidator.validLeader(notice.team.id, user.id)
+            notice.isCreator(user.id)
+        }
+
+        return noticeUpdater.update(notice, title, detail)
     }
 }

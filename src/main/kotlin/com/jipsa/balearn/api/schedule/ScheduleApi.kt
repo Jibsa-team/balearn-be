@@ -1,10 +1,7 @@
 package com.jipsa.balearn.api.schedule
 
 import com.jipsa.balearn.api.global.annotation.CurrentUser
-import com.jipsa.balearn.api.schedule.dto.ScheduleCreateRequest
-import com.jipsa.balearn.api.schedule.dto.ScheduleReadParam
-import com.jipsa.balearn.api.schedule.dto.ScheduleReadResponse
-import com.jipsa.balearn.api.schedule.dto.ScheduleResponse
+import com.jipsa.balearn.api.schedule.dto.*
 import com.jipsa.balearn.common.api.ApiResponse
 import com.jipsa.balearn.domain.schedule.ScheduleId
 import com.jipsa.balearn.domain.schedule.ScheduleService
@@ -84,6 +81,26 @@ class ScheduleApi(
         return ApiResponse.success(
             scheduleService.readWeeklySchedules(year, week, user.id, TeamId(teamId))
                 .map { ScheduleReadResponse.from(it) }
+        )
+    }
+
+    @PutMapping("/{scheduleId}")
+    fun updateSchedule(
+        @CurrentUser user: User,
+        @PathVariable scheduleId: Long,
+        @RequestBody request: ScheduleUpdateRequest
+    ): ApiResponse<ScheduleResponse> {
+        return ApiResponse.success(
+            scheduleService.updateSchedule(
+                ScheduleId(scheduleId),
+                address = request.address,
+                startTime = request.startTime,
+                endTime = request.endTime,
+                topic = request.topic,
+                missionUpdateRequest = request.missions,
+                user = user,
+                color = request.color,
+            )
         )
     }
 }

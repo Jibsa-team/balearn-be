@@ -33,7 +33,8 @@ class TeamService(
     private val missionReader: MissionReader,
     private val noticeReader: NoticeReader,
     private val teamInviter: TeamInviter,
-    private val teamUserValidator: TeamUserValidator
+    private val teamUserValidator: TeamUserValidator,
+    private val teamUpdater: TeamUpdater
 ) {
     @Transactional
     fun createTeam(name: String, description: String, goals: List<TeamGoalInfo>?, image: File?, user: User): Team {
@@ -75,7 +76,6 @@ class TeamService(
         return team
     }
 
-    @Transactional(readOnly = true)
     fun readTeam(teamId: TeamId, userId: UserId): TeamResponse {
         teamUserValidator.validTeamUser(teamId, userId)
         val team = TeamReadResponse.from(teamReader.read(teamId))
@@ -107,5 +107,19 @@ class TeamService(
     @Transactional
     fun joinTeam(inviteCode: String, user: User): TeamUser {
         return teamUserAppender.join(inviteCode, user)
+    }
+
+    @Transactional
+    fun updateTeam(teamId: TeamId, name: String?, description: String?, image: File?, user: User): Team {
+        teamUserValidator.validOwner(teamId, user.id)
+        val team = teamReader.read(teamId)
+        val imgUrl = teamImageAppender.append(image)
+
+        return teamUpdater.update(
+            team = team,
+            name = name,
+            description = description,
+            imgUrl = imgUrl
+        )
     }
 }
