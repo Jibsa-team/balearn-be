@@ -56,7 +56,11 @@ class NoticeService(
 
         teamUserValidator.validLeader(notice.team.id, user.id)
 
-        notice.isCreator(user.id)
+        try {
+            teamUserValidator.validOwner(notice.team.id, user.id)
+        } catch (e: Exception) {
+            notice.isCreator(user.id)
+        }
 
         return noticeUpdater.update(notice, title, detail)
     }
