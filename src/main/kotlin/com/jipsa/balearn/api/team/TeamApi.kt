@@ -65,4 +65,24 @@ class TeamApi(
     ): ApiResponse<TeamUserReadResponse> {
         return ApiResponse.success(TeamUserReadResponse.from(teamService.joinTeam(request.inviteCode, user)))
     }
+
+    @PutMapping("/{teamId}")
+    fun updateTeam(
+        @PathVariable teamId: Long,
+        @RequestPart("data") request: TeamUpdateRequest,
+        @RequestPart("image", required = false) image: MultipartFile?,
+        @CurrentUser user: User
+    ): ApiResponse<TeamReadResponse> {
+        return ApiResponse.success(
+            TeamReadResponse.from(
+                teamService.updateTeam(
+                    teamId = TeamId(teamId),
+                    name = request.name,
+                    description = request.description,
+                    image = image?.let { File.from(it) },
+                    user = user
+                )
+            )
+        )
+    }
 }

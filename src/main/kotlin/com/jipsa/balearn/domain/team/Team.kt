@@ -20,7 +20,11 @@ class Team(
     val teamInfo: TeamInfo
         get() = _teamInfo
 
-    fun updateTeamInfo(teamInfo: TeamInfo) {
-        this._teamInfo = teamInfo
+    fun updateTeamInfo(name: String?, description: String?, imgUrl: String?) {
+        this._teamInfo = TeamInfo(
+            name = name ?: this._teamInfo.name,
+            description = description ?: this._teamInfo.description,
+            teamImageUrl = imgUrl ?: this._teamInfo.teamImageUrl
+        )
     }
 }
