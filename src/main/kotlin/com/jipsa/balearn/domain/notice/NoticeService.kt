@@ -54,11 +54,10 @@ class NoticeService(
     fun updateNotice(user: User, noticeId: NoticeId, title: String?, detail: String?): Notice {
         val notice = noticeReader.read(noticeId)
 
-        teamUserValidator.validLeader(notice.team.id, user.id)
-
         try {
             teamUserValidator.validOwner(notice.team.id, user.id)
         } catch (e: Exception) {
+            teamUserValidator.validLeader(notice.team.id, user.id)
             notice.isCreator(user.id)
         }
 
