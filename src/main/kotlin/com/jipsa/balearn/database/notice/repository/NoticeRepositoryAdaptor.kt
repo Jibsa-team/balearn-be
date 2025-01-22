@@ -41,4 +41,8 @@ class NoticeRepositoryAdaptor(
     override fun deleteById(noticeId: NoticeId) {
         noticeJpaRepository.deleteById(noticeId.value)
     }
+
+    override fun deleteByTeamId(teamId: TeamId) {
+        noticeJpaRepository.deleteByTeam_Id(teamId.value)
+    }
 }

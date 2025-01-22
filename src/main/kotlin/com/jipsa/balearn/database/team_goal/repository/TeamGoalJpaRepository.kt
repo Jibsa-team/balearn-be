@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface TeamGoalJpaRepository : JpaRepository<TeamGoalEntity, Long> {
     fun findByTeam_Id(teamId: Long): List<TeamGoalEntity>
+
+    fun deleteByTeam_Id(teamId: Long)
 }

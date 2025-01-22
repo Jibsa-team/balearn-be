@@ -11,4 +11,6 @@ interface NoticeJpaRepository : JpaRepository<NoticeEntity, Long> {
     fun findFirstByTeam_IdOrderByCreatedAtDesc(teamId: Long): NoticeEntity?
 
     fun findByTeam_IdOrderByCreatedAtDesc(teamId: Long, pageable: Pageable): Page<NoticeEntity>
+
+    fun deleteByTeam_Id(teamId: Long)
 }

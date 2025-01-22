@@ -12,4 +12,5 @@ interface NoticeRepository {
     fun deleteById(noticeId: NoticeId)
     fun findFirstByTeamId(teamId: TeamId): Notice?
     fun findByTeamId(teamId: TeamId, pageable: Pageable): Page<Notice>
+    fun deleteByTeamId(teamId: TeamId)
 }

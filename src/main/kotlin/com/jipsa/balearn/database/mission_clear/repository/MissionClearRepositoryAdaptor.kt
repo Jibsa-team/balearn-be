@@ -45,4 +45,12 @@ class MissionClearRepositoryAdaptor(
     override fun deleteById(missionId: MissionId, teamUserId: TeamUserId) {
         missionClearJpaRepository.deleteById(MissionClearEntityId(missionId, teamUserId))
     }
+
+    override fun deleteByMissionId(missionId: MissionId) {
+        missionClearJpaRepository.deleteByMissionClearId_MissionId(missionId.value)
+    }
+
+    override fun deleteByTeamUserId(teamUserId: TeamUserId) {
+        missionClearJpaRepository.deleteByMissionClearId_TeamUserId(teamUserId.value)
+    }
 }

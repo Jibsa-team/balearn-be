@@ -49,4 +49,8 @@ class ScheduleRepositoryAdaptor(
     override fun deleteById(scheduleId: ScheduleId) {
         scheduleJpaRepository.deleteById(scheduleId.value)
     }
+
+    override fun deleteByTeamId(teamId: TeamId) {
+        scheduleJpaRepository.deleteByTeam_Id(teamId.value)
+    }
 }

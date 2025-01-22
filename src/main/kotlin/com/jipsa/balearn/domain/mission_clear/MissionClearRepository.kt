@@ -10,4 +10,6 @@ interface MissionClearRepository {
     fun existsById(missionId: MissionId, teamUserId: TeamUserId): Boolean
     fun deleteById(missionClearId: MissionClearId)
     fun deleteById(missionId: MissionId, teamUserId: TeamUserId)
+    fun deleteByMissionId(missionId: MissionId)
+    fun deleteByTeamUserId(teamUserId: TeamUserId)
 }

@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface MissionJpaRepository : JpaRepository<MissionEntity, Long> {
     fun findBySchedule_Id(scheduleId: Long): List<MissionEntity>
+
+    fun deleteBySchedule_Id(scheduleId: Long)
 }

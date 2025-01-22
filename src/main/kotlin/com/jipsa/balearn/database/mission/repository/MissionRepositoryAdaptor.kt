@@ -36,4 +36,8 @@ class MissionRepositoryAdaptor(
     override fun delete(mission: Mission) {
         missionJpaRepository.delete(MissionEntity.from(mission))
     }
+
+    override fun deleteByScheduleId(scheduleId: ScheduleId) {
+        missionJpaRepository.deleteBySchedule_Id(scheduleId.value)
+    }
 }
