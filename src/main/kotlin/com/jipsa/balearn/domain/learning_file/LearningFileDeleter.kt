@@ -11,7 +11,7 @@ class LearningFileDeleter(
         learningFileRepository.delete(learningFIle)
     }
 
-    fun delete(learningFIleId: LearningFIleId) {
+    fun delete(learningFIleId: LearningFileId) {
         learningFileRepository.deleteById(learningFIleId)
     }
 

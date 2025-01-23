@@ -13,7 +13,7 @@ data class LearningFIleInfoVO(
     val fileUrl: String,
 
     @Column(nullable = false)
-    val size: Double,
+    val size: Long,
 
     @Column(nullable = false)
     val type: String

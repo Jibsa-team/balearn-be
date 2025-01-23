@@ -2,9 +2,9 @@ package com.jipsa.balearn.database.learning_file.entity
 
 import com.jipsa.balearn.database.global.BaseEntity
 import com.jipsa.balearn.database.team.entity.TeamEntity
-import com.jipsa.balearn.domain.learning_file.LearningFIleId
-import com.jipsa.balearn.domain.learning_file.LearningFIleInfo
 import com.jipsa.balearn.domain.learning_file.LearningFile
+import com.jipsa.balearn.domain.learning_file.LearningFileId
+import com.jipsa.balearn.domain.user.UserId
 import jakarta.persistence.*
 
 @Entity
@@ -22,9 +22,13 @@ class LearningFileEntity(
     val learningFIleInfo: LearningFIleInfoVO
 ) : BaseEntity() {
     fun toDomain() = LearningFile(
-        id = LearningFIleId(id),
+        id = LearningFileId(id),
         team = team.toDomain(),
-        _learningFileInfo = learningFIleInfo.toDomain()
+        _learningFileInfo = learningFIleInfo.toDomain(),
+        createdBy = createdBy?.let { UserId(it) },
+        modifiedBy = modifiedBy?.let { UserId(it) },
+        createdAt = createdAt,
+        modifiedAt = modifiedAt
     )
 
     companion object {
