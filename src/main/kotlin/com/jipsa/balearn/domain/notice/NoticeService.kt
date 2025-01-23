@@ -16,7 +16,8 @@ class NoticeService(
     private val noticeReader: NoticeReader,
     private val teamUserValidator: TeamUserValidator,
     private val teamReader: TeamReader,
-    private val noticeUpdater: NoticeUpdater
+    private val noticeUpdater: NoticeUpdater,
+    private val noticeDeleter: NoticeDeleter
 
 ) {
     @Transactional
@@ -62,5 +63,19 @@ class NoticeService(
         }
 
         return noticeUpdater.update(notice, title, detail)
+    }
+
+    @Transactional
+    fun deleteNotice(user: User, noticeId: NoticeId) {
+        val notice = noticeReader.read(noticeId)
+
+        try {
+            teamUserValidator.validOwner(notice.team.id, user.id)
+        } catch (e: Exception) {
+            teamUserValidator.validLeader(notice.team.id, user.id)
+            notice.isCreator(user.id)
+        }
+
+        noticeDeleter.delete(notice)
     }
 }

@@ -12,7 +12,6 @@ import com.jipsa.balearn.domain.notice.NoticeService
 import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.user.User
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -83,5 +82,14 @@ class NoticeApi(
                 )
             )
         )
+    }
+
+    @DeleteMapping("/{noticeId}")
+    fun deleteNotice(
+        @CurrentUser user: User,
+        @PathVariable noticeId: Long
+    ): ApiResponse<Unit> {
+        noticeService.deleteNotice(user, NoticeId(noticeId))
+        return ApiResponse.success()
     }
 }
