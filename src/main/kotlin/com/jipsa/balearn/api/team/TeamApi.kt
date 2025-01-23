@@ -85,4 +85,13 @@ class TeamApi(
             )
         )
     }
+
+    @DeleteMapping("/{teamId}")
+    fun deleteTeam(
+        @PathVariable teamId: Long,
+        @CurrentUser user: User
+    ): ApiResponse<Unit> {
+        teamService.deleteTeam(TeamId(teamId), user)
+        return ApiResponse.success()
+    }
 }
