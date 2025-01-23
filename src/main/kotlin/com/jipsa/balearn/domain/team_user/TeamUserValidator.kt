@@ -24,12 +24,12 @@ class TeamUserValidator(
 
     fun validLeader(teamId: TeamId, userId: UserId) {
         teamUserRepository.findByTeamIdAndUserId(teamId, userId)?.isLeader()
-            ?: throw CustomTeamUserException.TeamUserNotValidException
+            ?: throw CustomTeamUserException.TeamUserPermissionDeniedException
     }
 
     fun validOwner(teamId: TeamId, userId: UserId) {
         teamUserRepository.findByTeamIdAndUserId(teamId, userId)?.isOwner()
-            ?: throw CustomTeamUserException.TeamUserNotValidException
+            ?: throw CustomTeamUserException.TeamUserPermissionDeniedException
     }
 
     fun isExistTeamOwner(userId: UserId) {

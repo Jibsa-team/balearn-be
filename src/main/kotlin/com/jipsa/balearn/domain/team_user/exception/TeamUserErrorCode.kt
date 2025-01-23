@@ -15,6 +15,7 @@ enum class TeamUserErrorCode(
     TEAM_USER_NOT_VALID(403, "TU004", "해당 모임에 가입되어있지 않습니다."),
     INVITE_CODE_NOT_VALID(403, "TU005", "해당 초대 코드가 유효하지 않습니다."),
     OWNER_CANNOT_LEAVE(403, "TU006", "모임장은 모임을 나갈 수 없습니다."),
+    TEAM_USER_PERMISSION_DENIED(403, "TU007", "해당 모임원은 대한 권한이 없습니다."),
     ;
 
     override val errorReason: ErrorReason
