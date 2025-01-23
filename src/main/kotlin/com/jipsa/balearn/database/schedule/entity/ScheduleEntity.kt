@@ -1,10 +1,12 @@
 package com.jipsa.balearn.database.schedule.entity
 
 import com.jipsa.balearn.database.global.BaseEntity
+import com.jipsa.balearn.database.mission.entity.MissionEntity
 import com.jipsa.balearn.database.team.entity.TeamEntity
 import com.jipsa.balearn.domain.schedule.Schedule
 import com.jipsa.balearn.domain.schedule.ScheduleId
 import jakarta.persistence.*
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 
 @Entity
 @Table(name = "schedules")
@@ -16,6 +18,9 @@ class ScheduleEntity(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     val team: TeamEntity,
+
+    @OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    val mission: MutableList<MissionEntity> = mutableListOf(),
 
     @Embedded
     val scheduleInfo: ScheduleInfoVO

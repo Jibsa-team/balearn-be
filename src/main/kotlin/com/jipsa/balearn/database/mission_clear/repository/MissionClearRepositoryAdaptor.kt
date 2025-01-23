@@ -2,10 +2,12 @@ package com.jipsa.balearn.database.mission_clear.repository
 
 import com.jipsa.balearn.database.mission_clear.entity.MissionClearEntity
 import com.jipsa.balearn.database.mission_clear.entity.MissionClearEntityId
+import com.jipsa.balearn.domain.mission.Mission
 import com.jipsa.balearn.domain.mission.MissionId
 import com.jipsa.balearn.domain.mission_clear.MissionClear
 import com.jipsa.balearn.domain.mission_clear.MissionClearId
 import com.jipsa.balearn.domain.mission_clear.MissionClearRepository
+import com.jipsa.balearn.domain.team_user.TeamUser
 import com.jipsa.balearn.domain.team_user.TeamUserId
 import org.springframework.stereotype.Repository
 
@@ -17,14 +19,16 @@ class MissionClearRepositoryAdaptor(
         return missionClearJpaRepository.save(MissionClearEntity.from(missionClear)).toDomain()
     }
 
-    override fun save(missionId: MissionId, teamUserId: TeamUserId): MissionClear {
+    override fun save(mission: Mission, teamUser: TeamUser): MissionClear {
         return missionClearJpaRepository.save(
             MissionClearEntity.from(
                 MissionClear(
                     MissionClearId(
-                        missionId,
-                        teamUserId
-                    )
+                        mission.id,
+                        teamUser.id
+                    ),
+                    mission,
+                    teamUser
                 )
             )
         ).toDomain()
