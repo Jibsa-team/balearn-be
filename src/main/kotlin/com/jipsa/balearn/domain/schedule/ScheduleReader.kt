@@ -48,6 +48,13 @@ class ScheduleReader(
         return scheduleRepository.findByStartDateAndEndDate(teamId, startOfMonth, endOfMonth)
     }
 
+    fun readDailyScheduleBy(teamId: TeamId): List<Schedule> {
+        val date = LocalDate.now()
+        val startOfDay = date.atStartOfDay()
+        val endOfDay = date.atTime(LocalTime.MAX)
+        return scheduleRepository.findByStartDateAndEndDate(teamId, startOfDay, endOfDay)
+    }
+
     fun isExistBy(teamId: TeamId, startTime: LocalDateTime, endTime: LocalDateTime) {
         if (scheduleRepository.existByStartDateAndEndDate(teamId, startTime, endTime)) {
             throw CustomScheduleException.ScheduleTimeOverlapException

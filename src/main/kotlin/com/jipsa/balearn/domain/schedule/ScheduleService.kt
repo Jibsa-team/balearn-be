@@ -1,10 +1,13 @@
 package com.jipsa.balearn.domain.schedule
 
+import com.jipsa.balearn.api.mission.dto.MissionReadResponse
 import com.jipsa.balearn.api.mission.dto.MissionUpdateRequest
 import com.jipsa.balearn.api.schedule.dto.ScheduleResponse
 import com.jipsa.balearn.domain.mission.*
+import com.jipsa.balearn.domain.mission_clear.MissionClearReader
 import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.team.TeamReader
+import com.jipsa.balearn.domain.team_user.TeamUserReader
 import com.jipsa.balearn.domain.team_user.TeamUserValidator
 import com.jipsa.balearn.domain.user.User
 import com.jipsa.balearn.domain.user.UserId
@@ -23,7 +26,9 @@ class ScheduleService(
     private val scheduleUpdater: ScheduleUpdater,
     private val missionUpdater: MissionUpdater,
     private val scheduleDeleter: ScheduleDeleter,
-    private val missionDeleter: MissionDeleter
+    private val missionDeleter: MissionDeleter,
+    private val teamUserReader: TeamUserReader,
+    private val missionClearReader: MissionClearReader
 ) {
     @Transactional
     fun appendSchedule(
@@ -97,6 +102,21 @@ class ScheduleService(
         teamUserValidator.validTeamUser(teamId, userId)
 
         return scheduleReader.readWeeklyScheduleBy(teamId, year, week)
+    }
+
+    fun readDailySchedules(user: User, teamId: TeamId): List<ScheduleResponse> {
+        val teamUser = teamUserReader.readBy(teamId, user.id)
+
+        val schedules = scheduleReader.readDailyScheduleBy(teamId)
+
+        return schedules.map { schedule ->
+            val missions = missionReader.readBy(schedule.id)
+            val missionResponse = missions.map { mission ->
+                val missionClear = missionClearReader.existsBy(mission.id, teamUser.id)
+                MissionReadResponse.from(mission, missionClear)
+            }
+            ScheduleResponse.fromResponse(schedule, missionResponse)
+        }
     }
 
     @Transactional

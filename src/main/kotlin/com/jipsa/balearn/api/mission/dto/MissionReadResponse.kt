@@ -1,8 +1,6 @@
 package com.jipsa.balearn.api.mission.dto
 
 import com.jipsa.balearn.domain.mission.Mission
-import com.jipsa.balearn.domain.notice.Notice
-import org.springframework.data.jpa.domain.AbstractAuditable_.createdBy
 import java.time.LocalDateTime
 
 data class MissionReadResponse(
@@ -11,7 +9,8 @@ data class MissionReadResponse(
     val createdAt: LocalDateTime?,
     val createdBy: Long?,
     val modifiedAt: LocalDateTime?,
-    val modifiedBy: Long?
+    val modifiedBy: Long?,
+    val clear: Boolean? = null
 ) {
     companion object {
         fun from(mission: Mission): MissionReadResponse {
@@ -22,6 +21,18 @@ data class MissionReadResponse(
                 createdBy = mission.createdBy?.value,
                 modifiedAt = mission.modifiedAt,
                 modifiedBy = mission.modifiedBy?.value
+            )
+        }
+
+        fun from(mission: Mission, clear: Boolean): MissionReadResponse {
+            return MissionReadResponse(
+                id = mission.id.value,
+                detail = mission.missionInfo.detail,
+                createdAt = mission.createdAt,
+                createdBy = mission.createdBy?.value,
+                modifiedAt = mission.modifiedAt,
+                modifiedBy = mission.modifiedBy?.value,
+                clear = clear
             )
         }
     }
