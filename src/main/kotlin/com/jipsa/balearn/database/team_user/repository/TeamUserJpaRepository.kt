@@ -1,6 +1,7 @@
 package com.jipsa.balearn.database.team_user.repository
 
 import com.jipsa.balearn.database.team_user.entity.TeamUserEntity
+import com.jipsa.balearn.domain.team_user.TeamUserRole
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface TeamUserJpaRepository : JpaRepository<TeamUserEntity, Long> {
@@ -13,9 +14,9 @@ interface TeamUserJpaRepository : JpaRepository<TeamUserEntity, Long> {
 
     fun existsByTeam_IdAndUser_Id(teamId: Long, userId: Long): Boolean
 
-    fun existsByUser_IdAndProfile_Role(userId: Long, role: String): Boolean
+    fun existsByUser_IdAndProfile_Role(userId: Long, role: TeamUserRole): Boolean
 
-    fun existsByTeam_IdAndUser_IdAndProfile_Role(teamId: Long, userId: Long, role: String): Boolean
+    fun existsByTeam_IdAndUser_IdAndProfile_Role(teamId: Long, userId: Long, role: TeamUserRole): Boolean
 
     fun deleteByTeam_Id(teamId: Long)
 

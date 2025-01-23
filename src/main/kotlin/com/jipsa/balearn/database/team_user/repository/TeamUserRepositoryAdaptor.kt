@@ -43,14 +43,14 @@ class TeamUserRepositoryAdaptor(
     }
 
     override fun existsByUserIdAndRole(userId: UserId, role: TeamUserRole): Boolean {
-        return teamUserJpaRepository.existsByUser_IdAndProfile_Role(userId.value, role.toString())
+        return teamUserJpaRepository.existsByUser_IdAndProfile_Role(userId.value, role)
     }
 
     override fun existsByTeamIdAndUserIdAndRole(teamId: TeamId, userId: UserId, role: TeamUserRole): Boolean {
         return teamUserJpaRepository.existsByTeam_IdAndUser_IdAndProfile_Role(
             teamId.value,
             userId.value,
-            role.toString()
+            role
         )
     }
 
