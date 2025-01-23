@@ -9,4 +9,5 @@ interface TeamGoalRepository {
     fun findById(teamGoalId: TeamGoalId): TeamGoal?
     fun delete(teamGoal: TeamGoal)
     fun deleteById(teamGoalId: TeamGoalId)
+    fun deleteByTeamId(teamId: TeamId)
 }

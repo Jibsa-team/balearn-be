@@ -34,7 +34,8 @@ class TeamService(
     private val noticeReader: NoticeReader,
     private val teamInviter: TeamInviter,
     private val teamUserValidator: TeamUserValidator,
-    private val teamUpdater: TeamUpdater
+    private val teamUpdater: TeamUpdater,
+    private val teamDeleter: TeamDeleter
 ) {
     @Transactional
     fun createTeam(name: String, description: String, goals: List<TeamGoalInfo>?, image: File?, user: User): Team {
@@ -121,5 +122,12 @@ class TeamService(
             description = description,
             imgUrl = imgUrl
         )
+    }
+
+    @Transactional
+    fun deleteTeam(teamId: TeamId, user: User) {
+        teamUserValidator.validOwner(teamId, user.id)
+        val team = teamReader.read(teamId)
+        teamDeleter.delete(team)
     }
 }

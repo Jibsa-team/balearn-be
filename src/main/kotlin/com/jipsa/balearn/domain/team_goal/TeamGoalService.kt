@@ -13,7 +13,8 @@ class TeamGoalService(
     private val teamUserValidator: TeamUserValidator,
     private val teamGoalReader: TeamGoalReader,
     private val teamReader: TeamReader,
-    private val teamGoalUpdater: TeamGoalUpdater
+    private val teamGoalUpdater: TeamGoalUpdater,
+    private val teamGoalDeleter: TeamGoalDeleter
 ) {
     @Transactional
     fun appendTeamGoal(detail: String, color: String, teamId: TeamId, userId: UserId): TeamGoal {
@@ -51,5 +52,13 @@ class TeamGoalService(
         teamGoalUpdater.update(teamGoal, detail, color)
 
         return teamGoal
+    }
+
+    @Transactional
+    fun deleteTeamGoal(userId: UserId, teamGoalId: TeamGoalId) {
+        val teamGoal = teamGoalReader.read(teamGoalId)
+        teamUserValidator.validLeader(teamGoal.team.id, userId)
+
+        teamGoalDeleter.delete(teamGoal)
     }
 }

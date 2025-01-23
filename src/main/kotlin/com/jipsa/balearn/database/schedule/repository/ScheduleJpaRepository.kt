@@ -27,4 +27,6 @@ interface ScheduleJpaRepository : JpaRepository<ScheduleEntity, Long> {
         @Param("startTime") startTime: LocalDateTime,
         @Param("endTime") endTime: LocalDateTime
     ): Boolean
+
+    fun deleteByTeam_Id(teamId: Long)
 }

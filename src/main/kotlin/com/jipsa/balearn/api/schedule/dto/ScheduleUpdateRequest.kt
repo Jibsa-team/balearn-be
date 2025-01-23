@@ -9,6 +9,7 @@ data class ScheduleUpdateRequest(
     val endTime: LocalDateTime?,
     val topic: String?,
     val color: String?,
-    val missions: List<MissionUpdateRequest>?
+    val missions: List<MissionUpdateRequest>?,
+    val deleteMissions: List<Long>?
 ) {
 }

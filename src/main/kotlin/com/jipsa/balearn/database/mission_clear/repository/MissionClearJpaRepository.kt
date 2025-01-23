@@ -9,4 +9,8 @@ interface MissionClearJpaRepository : JpaRepository<MissionClearEntity, MissionC
         missionId: Long,
         teamUserId: Long
     ): Boolean
+
+    fun deleteByMissionClearId_MissionId(missionId: Long)
+
+    fun deleteByMissionClearId_TeamUserId(teamUserId: Long)
 }

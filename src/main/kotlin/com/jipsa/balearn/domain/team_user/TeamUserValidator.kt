@@ -1,7 +1,6 @@
 package com.jipsa.balearn.domain.team_user
 
 import com.jipsa.balearn.domain.team.TeamId
-import com.jipsa.balearn.domain.team.TeamRepository
 import com.jipsa.balearn.domain.team_user.exception.CustomTeamUserException
 import com.jipsa.balearn.domain.user.UserId
 import org.springframework.stereotype.Component
@@ -31,5 +30,17 @@ class TeamUserValidator(
     fun validOwner(teamId: TeamId, userId: UserId) {
         teamUserRepository.findByTeamIdAndUserId(teamId, userId)?.isOwner()
             ?: throw CustomTeamUserException.TeamUserNotValidException
+    }
+
+    fun isExistTeamOwner(userId: UserId) {
+        if (teamUserRepository.existsByUserIdAndRole(userId, TeamUserRole.OWNER)) {
+            throw CustomTeamUserException.OwnerCannotLeaveException
+        }
+    }
+
+    fun isOwner(teamId: TeamId, userId: UserId) {
+        if (teamUserRepository.existsByTeamIdAndUserIdAndRole(teamId, userId, TeamUserRole.OWNER)) {
+            throw CustomTeamUserException.OwnerCannotLeaveException
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.jipsa.balearn.api.schedule
 import com.jipsa.balearn.api.global.annotation.CurrentUser
 import com.jipsa.balearn.api.schedule.dto.*
 import com.jipsa.balearn.common.api.ApiResponse
+import com.jipsa.balearn.domain.mission.MissionId
 import com.jipsa.balearn.domain.schedule.ScheduleId
 import com.jipsa.balearn.domain.schedule.ScheduleService
 import com.jipsa.balearn.domain.team.TeamId
@@ -100,7 +101,17 @@ class ScheduleApi(
                 missionUpdateRequest = request.missions,
                 user = user,
                 color = request.color,
+                deleteMissionIds = request.deleteMissions?.map { MissionId(it) }
             )
         )
+    }
+
+    @DeleteMapping("/{scheduleId}")
+    fun deleteSchedule(
+        @CurrentUser user: User,
+        @PathVariable scheduleId: Long
+    ): ApiResponse<Unit> {
+        scheduleService.deleteSchedule(ScheduleId(scheduleId), user)
+        return ApiResponse.success()
     }
 }

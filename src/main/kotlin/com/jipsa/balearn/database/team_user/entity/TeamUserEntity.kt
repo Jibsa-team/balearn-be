@@ -1,6 +1,7 @@
 package com.jipsa.balearn.database.team_user.entity
 
 import com.jipsa.balearn.database.global.BaseTimeEntity
+import com.jipsa.balearn.database.mission_clear.entity.MissionClearEntity
 import com.jipsa.balearn.database.team.entity.TeamEntity
 import com.jipsa.balearn.database.user.entity.UserEntity
 import com.jipsa.balearn.domain.team_user.TeamUser
@@ -24,7 +25,10 @@ class TeamUserEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    val user: UserEntity
+    val user: UserEntity,
+
+    @OneToMany(mappedBy = "teamUser", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    val missionClear: MutableList<MissionClearEntity> = mutableListOf()
 ) : BaseTimeEntity() {
     fun toDomain() = TeamUser(
         id = TeamUserId(id),
