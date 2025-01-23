@@ -35,7 +35,7 @@ class MissionClearService(
         missionClearDeleter.delete(teamUser.id, missionId)
     }
 
-    fun readLeaderboard(teamId: TeamId): List<LeaderboardResponse> {
-        return leaderboardReader.read(teamId)
+    fun readLeaderboard(teamId: TeamId, topN: Int): List<LeaderboardResponse> {
+        return leaderboardReader.read(teamId, topN)
     }
 }

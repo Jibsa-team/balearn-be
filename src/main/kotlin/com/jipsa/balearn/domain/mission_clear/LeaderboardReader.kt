@@ -12,8 +12,8 @@ class LeaderboardReader(
     private val redisRepository: RedisRepository,
     private val teamUserReader: TeamUserReader
 ) {
-    fun read(teamId: TeamId): List<LeaderboardResponse> {
-        val results = redisRepository.getTopZSet(redisRepository.generateLeaderboardKey(teamId.value), 5)
+    fun read(teamId: TeamId, topN: Int = 5): List<LeaderboardResponse> {
+        val results = redisRepository.getTopZSet(redisRepository.generateLeaderboardKey(teamId.value), topN)
         return results?.mapIndexed { index, tuple ->
             val teamUserId = tuple.value?.let { TeamUserId(it.toLong()) } // Redis에서 가져온 userId
             val score = tuple.score?.toInt() ?: 0 // 점수

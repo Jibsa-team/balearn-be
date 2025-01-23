@@ -18,9 +18,10 @@ class LeaderboardApi(
     @GetMapping("/{teamId}")
     fun readLeaderboard(
         @CurrentUser user: User,
-        @PathVariable teamId: Long
+        @PathVariable teamId: Long,
+        @RequestParam(required = false) top: Int?
     ): ApiResponse<List<LeaderboardResponse>> {
-        return ApiResponse.success(missionClearService.readLeaderboard(TeamId(teamId)))
+        return ApiResponse.success(missionClearService.readLeaderboard(TeamId(teamId), top ?: 5))
     }
 
     @PostMapping("/{teamId}/clear/{missionId}")
