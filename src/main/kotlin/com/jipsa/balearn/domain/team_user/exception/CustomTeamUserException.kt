@@ -44,4 +44,11 @@ sealed class CustomTeamUserException(errorCode: TeamUserErrorCode) : CustomExcep
 
         val EXCEPTION: CustomTeamUserException = OwnerCannotLeaveException
     }
+
+    data object TeamUserPermissionDeniedException :
+        CustomTeamUserException(TeamUserErrorCode.TEAM_USER_PERMISSION_DENIED) {
+        private fun readResolve(): Any = TeamUserPermissionDeniedException
+
+        val EXCEPTION: CustomTeamUserException = TeamUserPermissionDeniedException
+    }
 }

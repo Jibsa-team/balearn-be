@@ -6,7 +6,7 @@ import com.jipsa.balearn.domain.user.UserId
 import java.time.LocalDateTime
 
 class LearningFile(
-    val id: LearningFIleId = LearningFIleId(),
+    val id: LearningFileId = LearningFileId(),
     val team: Team,
     private var _learningFileInfo: LearningFIleInfo,
     createdAt: LocalDateTime? = null,
@@ -24,5 +24,9 @@ class LearningFile(
 
     fun updateLearningFileInfo(learningFileInfo: LearningFIleInfo) {
         _learningFileInfo = learningFileInfo
+    }
+
+    fun isCreator(userId: UserId) {
+        require(createdBy == userId) { "작성자만 가능합니다." }
     }
 }
