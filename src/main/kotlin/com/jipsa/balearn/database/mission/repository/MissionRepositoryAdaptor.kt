@@ -5,7 +5,6 @@ import com.jipsa.balearn.domain.mission.Mission
 import com.jipsa.balearn.domain.mission.MissionId
 import com.jipsa.balearn.domain.mission.MissionRepository
 import com.jipsa.balearn.domain.schedule.ScheduleId
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.stereotype.Repository
 import kotlin.jvm.optionals.getOrNull
 
@@ -39,5 +38,9 @@ class MissionRepositoryAdaptor(
 
     override fun deleteByScheduleId(scheduleId: ScheduleId) {
         missionJpaRepository.deleteBySchedule_Id(scheduleId.value)
+    }
+
+    override fun deleteAllById(missions: List<MissionId>) {
+        missionJpaRepository.deleteAllById(missions.map { it.value })
     }
 }

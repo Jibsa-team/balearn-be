@@ -21,7 +21,9 @@ class ScheduleService(
     private val teamUserValidator: TeamUserValidator,
     private val teamReader: TeamReader,
     private val scheduleUpdater: ScheduleUpdater,
-    private val missionUpdater: MissionUpdater
+    private val missionUpdater: MissionUpdater,
+    private val scheduleDeleter: ScheduleDeleter,
+    private val missionDeleter: MissionDeleter
 ) {
     @Transactional
     fun appendSchedule(
@@ -106,23 +108,28 @@ class ScheduleService(
         topic: String?,
         color: String?,
         missionUpdateRequest: List<MissionUpdateRequest>?,
-        user: User
+        deleteMissionIds: List<MissionId>?,
+        user: User,
     ): ScheduleResponse {
         val schedule = scheduleReader.read(scheduleId)
 
         teamUserValidator.validTeamUser(schedule.team.id, user.id)
 
         try {
-            teamUserValidator.validOwner(schedule.team.id, user.id)
+            teamUserValidator.validLeader(schedule.team.id, user.id)
         } catch (e: Exception) {
             schedule.isCreator(user.id)
         }
 
-        scheduleReader.isExistBy(
-            schedule.team.id,
-            startTime ?: schedule.scheduleInfo.startTime,
-            endTime ?: schedule.scheduleInfo.endTime
-        )
+        if (startTime != null || endTime != null) {
+            if (startTime != schedule.scheduleInfo.startTime || endTime != schedule.scheduleInfo.endTime) {
+                scheduleReader.isExistBy(
+                    schedule.team.id,
+                    startTime ?: schedule.scheduleInfo.startTime,
+                    endTime ?: schedule.scheduleInfo.endTime
+                )
+            }
+        }
 
         val newSchedule =
             scheduleUpdater.update(
@@ -134,9 +141,27 @@ class ScheduleService(
                 color = color
             )
 
+        missionUpdateRequest?.let { missionUpdater.updateMissions(it) }
+        deleteMissionIds?.let { missionDeleter.deleteAllBy(it) }
+
         val missions =
-            missionUpdateRequest?.let { missionUpdater.updateMissions(it) } ?: missionReader.readBy(scheduleId)
+            missionReader.readBy(scheduleId)
 
         return ScheduleResponse.from(newSchedule, missions)
+    }
+
+    @Transactional
+    fun deleteSchedule(scheduleId: ScheduleId, user: User) {
+        val schedule = scheduleReader.read(scheduleId)
+
+        teamUserValidator.validTeamUser(schedule.team.id, user.id)
+
+        try {
+            teamUserValidator.validLeader(schedule.team.id, user.id)
+        } catch (e: Exception) {
+            schedule.isCreator(user.id)
+        }
+
+        scheduleDeleter.delete(schedule)
     }
 }

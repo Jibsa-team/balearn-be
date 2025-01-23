@@ -10,4 +10,5 @@ interface MissionRepository {
     fun delete(mission: Mission)
     fun saveAll(missions: List<Mission>): List<Mission>
     fun deleteByScheduleId(scheduleId: ScheduleId)
+    fun deleteAllById(missions: List<MissionId>)
 }
