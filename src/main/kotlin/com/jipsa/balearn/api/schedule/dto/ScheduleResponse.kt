@@ -26,5 +26,17 @@ data class ScheduleResponse(
                 mission = missions.map { MissionReadResponse.from(it) }
             )
         }
+
+        fun fromResponse(schedule: Schedule, missionResponses: List<MissionReadResponse>): ScheduleResponse {
+            return ScheduleResponse(
+                id = schedule.id.value,
+                address = schedule.scheduleInfo.address,
+                startTime = schedule.scheduleInfo.startTime,
+                endTime = schedule.scheduleInfo.endTime,
+                topic = schedule.scheduleInfo.topic,
+                color = schedule.scheduleInfo.color,
+                mission = missionResponses
+            )
+        }
     }
 }

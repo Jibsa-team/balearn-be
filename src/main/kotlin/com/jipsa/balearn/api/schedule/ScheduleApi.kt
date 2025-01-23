@@ -85,6 +85,16 @@ class ScheduleApi(
         )
     }
 
+    @GetMapping("/today/team/{teamId}")
+    fun getScheduleByToday(
+        @CurrentUser user: User,
+        @PathVariable teamId: Long
+    ): ApiResponse<List<ScheduleResponse>> {
+        return ApiResponse.success(
+            scheduleService.readDailySchedules(user, TeamId(teamId))
+        )
+    }
+
     @PutMapping("/{scheduleId}")
     fun updateSchedule(
         @CurrentUser user: User,
