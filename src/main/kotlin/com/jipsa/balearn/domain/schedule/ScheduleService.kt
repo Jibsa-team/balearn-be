@@ -141,7 +141,7 @@ class ScheduleService(
                 color = color
             )
 
-        missionUpdateRequest?.let { missionUpdater.updateMissions(it) }
+        missionUpdateRequest?.let { missionUpdater.updateMissions(it, newSchedule) }
         deleteMissionIds?.let { missionDeleter.deleteAllBy(it) }
 
         val missions =

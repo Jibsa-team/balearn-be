@@ -2,6 +2,7 @@ package com.jipsa.balearn.domain.mission
 
 import com.jipsa.balearn.api.mission.dto.MissionUpdateRequest
 import com.jipsa.balearn.domain.notice.exception.CustomMissionException
+import com.jipsa.balearn.domain.schedule.Schedule
 import org.springframework.stereotype.Component
 
 @Component
@@ -14,12 +15,19 @@ class MissionUpdater(
         return missionRepository.save(mission)
     }
 
-    fun updateMissions(request: List<MissionUpdateRequest>): List<Mission> {
-        val missions = request.map {
-            val mission = missionRepository.findById(MissionId(it.id))
-                ?: throw CustomMissionException.MissionNotFoundException
-            mission.updateMissionInfo(it.detail)
-            mission
+    fun updateMissions(requests: List<MissionUpdateRequest>, schedule: Schedule): List<Mission> {
+        val missions = requests.map { request ->
+            request.id?.let {
+                val mission = missionRepository.findById(MissionId(it))
+                    ?: throw CustomMissionException.MissionNotFoundException
+                mission.updateMissionInfo(request.detail)
+                mission
+            } ?: Mission(
+                _missionInfo = MissionInfo(
+                    detail = request.detail,
+                ),
+                schedule = schedule
+            )
         }
         return missionRepository.saveAll(missions)
     }
