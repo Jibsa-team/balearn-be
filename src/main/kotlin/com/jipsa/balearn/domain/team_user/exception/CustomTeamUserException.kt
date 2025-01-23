@@ -37,4 +37,11 @@ sealed class CustomTeamUserException(errorCode: TeamUserErrorCode) : CustomExcep
 
         val EXCEPTION: CustomTeamUserException = InviteCodeNotValidException
     }
+
+    data object OwnerCannotLeaveException :
+        CustomTeamUserException(TeamUserErrorCode.OWNER_CANNOT_LEAVE) {
+        private fun readResolve(): Any = OwnerCannotLeaveException
+
+        val EXCEPTION: CustomTeamUserException = OwnerCannotLeaveException
+    }
 }

@@ -2,6 +2,7 @@ package com.jipsa.balearn.database.user.repository
 
 import com.jipsa.balearn.database.user.entity.UserEntity
 import com.jipsa.balearn.domain.user.User
+import com.jipsa.balearn.domain.user.UserId
 import com.jipsa.balearn.domain.user.UserRepository
 import org.springframework.stereotype.Repository
 import kotlin.jvm.optionals.getOrNull
@@ -30,8 +31,12 @@ class UserRepositoryAdaptor(
         userJPARepository.delete(UserEntity.from(user))
     }
 
-    override fun findById(id: Long): User? {
-        return userJPARepository.findById(id).getOrNull()?.toDomain()
+    override fun deleteById(userId: UserId) {
+        userJPARepository.deleteById(userId.value)
+    }
+
+    override fun findById(userId: UserId): User? {
+        return userJPARepository.findById(userId.value).getOrNull()?.toDomain()
     }
 
 }

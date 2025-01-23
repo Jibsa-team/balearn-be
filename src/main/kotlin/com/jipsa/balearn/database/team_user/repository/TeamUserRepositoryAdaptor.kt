@@ -1,15 +1,12 @@
 package com.jipsa.balearn.database.team_user.repository
 
-import com.jipsa.balearn.database.team.entity.TeamEntity
 import com.jipsa.balearn.database.team_user.entity.TeamUserEntity
-import com.jipsa.balearn.domain.team.Team
 import com.jipsa.balearn.domain.team.TeamId
-import com.jipsa.balearn.domain.team.TeamInfo
 import com.jipsa.balearn.domain.team_user.TeamUser
 import com.jipsa.balearn.domain.team_user.TeamUserId
 import com.jipsa.balearn.domain.team_user.TeamUserRepository
+import com.jipsa.balearn.domain.team_user.TeamUserRole
 import com.jipsa.balearn.domain.user.UserId
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.stereotype.Repository
 import kotlin.jvm.optionals.getOrNull
 
@@ -43,6 +40,18 @@ class TeamUserRepositoryAdaptor(
 
     override fun existsByTeamIdAndUserId(teamId: TeamId, userId: UserId): Boolean {
         return teamUserJpaRepository.existsByTeam_IdAndUser_Id(teamId.value, userId.value)
+    }
+
+    override fun existsByUserIdAndRole(userId: UserId, role: TeamUserRole): Boolean {
+        return teamUserJpaRepository.existsByUser_IdAndProfile_Role(userId.value, role.toString())
+    }
+
+    override fun existsByTeamIdAndUserIdAndRole(teamId: TeamId, userId: UserId, role: TeamUserRole): Boolean {
+        return teamUserJpaRepository.existsByTeam_IdAndUser_IdAndProfile_Role(
+            teamId.value,
+            userId.value,
+            role.toString()
+        )
     }
 
     override fun delete(teamUser: TeamUser) {

@@ -8,7 +8,7 @@ class UserReader(
     private val userRepository: UserRepository
 ) {
     fun read(userId: UserId): User {
-        return userRepository.findById(userId.value) ?: throw CustomUserException.UserNotFoundException
+        return userRepository.findById(userId) ?: throw CustomUserException.UserNotFoundException
     }
 
     fun readByEmail(email: String): User {
