@@ -78,4 +78,16 @@ class TeamGoalApi(
             )
         )
     }
+
+    @DeleteMapping("/goal/{teamGoalId}")
+    fun deleteTeamGoal(
+        @CurrentUser user: User,
+        @PathVariable teamGoalId: Long
+    ): ApiResponse<Unit> {
+        teamGoalService.deleteTeamGoal(
+            teamGoalId = TeamGoalId(teamGoalId),
+            userId = user.id
+        )
+        return ApiResponse.success()
+    }
 }
