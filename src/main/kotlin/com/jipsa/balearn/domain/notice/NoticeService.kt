@@ -1,7 +1,8 @@
 package com.jipsa.balearn.domain.notice
 
+import com.jipsa.balearn.api.notice.dto.NoticeResponse
 import com.jipsa.balearn.domain.team.TeamId
-import com.jipsa.balearn.domain.team.TeamReader
+import com.jipsa.balearn.domain.team_user.TeamUserReader
 import com.jipsa.balearn.domain.team_user.TeamUserValidator
 import com.jipsa.balearn.domain.user.User
 import com.jipsa.balearn.domain.user.UserId
@@ -15,14 +16,13 @@ class NoticeService(
     private val noticeAppender: NoticeAppender,
     private val noticeReader: NoticeReader,
     private val teamUserValidator: TeamUserValidator,
-    private val teamReader: TeamReader,
     private val noticeUpdater: NoticeUpdater,
-    private val noticeDeleter: NoticeDeleter
-
+    private val noticeDeleter: NoticeDeleter,
+    private val teamUserReader: TeamUserReader
 ) {
     @Transactional
-    fun appendNotice(title: String, detail: String, userId: UserId, teamId: TeamId): Notice {
-        val team = teamReader.read(teamId)
+    fun appendNotice(title: String, detail: String, userId: UserId, teamId: TeamId): NoticeResponse {
+        val teamUser = teamUserReader.readBy(teamId, userId)
 
         teamUserValidator.validLeader(teamId, userId)
 
@@ -31,28 +31,38 @@ class NoticeService(
                 title = title,
                 detail = detail
             ),
-            team = team
+            team = teamUser.team
         )
 
-        return noticeAppender.append(notice, team)
+        val newNotice = noticeAppender.append(notice, teamUser.team)
+
+        return NoticeResponse.from(newNotice, teamUser, teamUser)
     }
 
-    fun readNotice(userId: UserId, noticeId: NoticeId): Notice {
+    fun readNotice(userId: UserId, noticeId: NoticeId): NoticeResponse {
         val notice = noticeReader.read(noticeId)
 
         teamUserValidator.validTeamUser(notice.team.id, userId)
 
-        return notice
+        val createdBy = notice.createdBy?.let { teamUserReader.readBy(notice.team.id, it) }
+        val modifiedBy = notice.modifiedBy?.let { teamUserReader.readBy(notice.team.id, it) }
+
+        return NoticeResponse.from(notice, createdBy, modifiedBy)
     }
 
-    fun readNoticePage(userId: UserId, teamId: TeamId, pageable: Pageable): Page<Notice> {
+    fun readNoticePage(userId: UserId, teamId: TeamId, pageable: Pageable): Page<NoticeResponse> {
         teamUserValidator.validTeamUser(teamId, userId)
 
-        return noticeReader.readBy(teamId, pageable)
+        return noticeReader.readBy(teamId, pageable).map { notice ->
+            val createdBy = notice.createdBy?.let { teamUserReader.readBy(notice.team.id, it) }
+            val modifiedBy = notice.modifiedBy?.let { teamUserReader.readBy(notice.team.id, it) }
+
+            NoticeResponse.from(notice, createdBy, modifiedBy)
+        }
     }
 
     @Transactional
-    fun updateNotice(user: User, noticeId: NoticeId, title: String?, detail: String?): Notice {
+    fun updateNotice(user: User, noticeId: NoticeId, title: String?, detail: String?): NoticeResponse {
         val notice = noticeReader.read(noticeId)
 
         try {
@@ -62,7 +72,11 @@ class NoticeService(
             notice.isCreator(user.id)
         }
 
-        return noticeUpdater.update(notice, title, detail)
+        val updatedNotice = noticeUpdater.update(notice, title, detail)
+        val createdBy = updatedNotice.createdBy?.let { teamUserReader.readBy(updatedNotice.team.id, it) }
+        val modifiedBy = updatedNotice.modifiedBy?.let { teamUserReader.readBy(updatedNotice.team.id, it) }
+
+        return NoticeResponse.from(updatedNotice, createdBy, modifiedBy)
     }
 
     @Transactional
