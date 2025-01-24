@@ -80,7 +80,8 @@ class TeamApi(
                     name = request.name,
                     description = request.description,
                     image = image?.let { File.from(it) },
-                    user = user
+                    user = user,
+                    teamGoalsUpdateRequest = request.goals
                 )
             )
         )

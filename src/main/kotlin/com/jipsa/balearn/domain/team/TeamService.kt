@@ -5,15 +5,13 @@ import com.jipsa.balearn.api.schedule.dto.ScheduleResponse
 import com.jipsa.balearn.api.team.dto.TeamReadResponse
 import com.jipsa.balearn.api.team.dto.TeamResponse
 import com.jipsa.balearn.api.team_goal.dto.TeamGoalReadResponse
+import com.jipsa.balearn.api.team_goal.dto.TeamGoalsUpdateRequest
 import com.jipsa.balearn.api.team_user.dto.TeamUserReadResponse
 import com.jipsa.balearn.common.dto.File
 import com.jipsa.balearn.domain.mission.MissionReader
 import com.jipsa.balearn.domain.notice.NoticeReader
 import com.jipsa.balearn.domain.schedule.ScheduleReader
-import com.jipsa.balearn.domain.team_goal.TeamGoal
-import com.jipsa.balearn.domain.team_goal.TeamGoalAppender
-import com.jipsa.balearn.domain.team_goal.TeamGoalInfo
-import com.jipsa.balearn.domain.team_goal.TeamGoalReader
+import com.jipsa.balearn.domain.team_goal.*
 import com.jipsa.balearn.domain.team_user.*
 import com.jipsa.balearn.domain.user.User
 import com.jipsa.balearn.domain.user.UserId
@@ -35,7 +33,8 @@ class TeamService(
     private val teamInviter: TeamInviter,
     private val teamUserValidator: TeamUserValidator,
     private val teamUpdater: TeamUpdater,
-    private val teamDeleter: TeamDeleter
+    private val teamDeleter: TeamDeleter,
+    private val teamGoalUpdater: TeamGoalUpdater
 ) {
     @Transactional
     fun createTeam(name: String, description: String, goals: List<TeamGoalInfo>?, image: File?, user: User): Team {
@@ -111,10 +110,20 @@ class TeamService(
     }
 
     @Transactional
-    fun updateTeam(teamId: TeamId, name: String?, description: String?, image: File?, user: User): Team {
+    fun updateTeam(
+        teamId: TeamId,
+        name: String?,
+        description: String?,
+        image: File?,
+        user: User,
+        teamGoalsUpdateRequest: List<TeamGoalsUpdateRequest>?
+    ): Team {
         teamUserValidator.validOwner(teamId, user.id)
+
         val team = teamReader.read(teamId)
         val imgUrl = teamImageAppender.append(image)
+
+        teamGoalUpdater.updateAll(teamGoalsUpdateRequest)
 
         return teamUpdater.update(
             team = team,
