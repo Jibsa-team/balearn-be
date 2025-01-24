@@ -4,7 +4,7 @@ import com.grepp.quizy.common.dto.Page
 import com.grepp.quizy.common.dto.PageResult
 import com.jipsa.balearn.api.global.annotation.CurrentUser
 import com.jipsa.balearn.api.notice.dto.NoticeCreateRequest
-import com.jipsa.balearn.api.notice.dto.NoticeReadResponse
+import com.jipsa.balearn.api.notice.dto.NoticeResponse
 import com.jipsa.balearn.api.notice.dto.NoticeUpdateRequest
 import com.jipsa.balearn.common.api.ApiResponse
 import com.jipsa.balearn.domain.notice.NoticeId
@@ -24,15 +24,13 @@ class NoticeApi(
     fun createNotice(
         @CurrentUser user: User,
         @RequestBody request: NoticeCreateRequest
-    ): ApiResponse<NoticeReadResponse> {
+    ): ApiResponse<NoticeResponse> {
         return ApiResponse.success(
-            NoticeReadResponse.from(
-                noticeService.appendNotice(
-                    request.title,
-                    request.detail,
-                    user.id,
-                    TeamId(request.teamId)
-                )
+            noticeService.appendNotice(
+                request.title,
+                request.detail,
+                user.id,
+                TeamId(request.teamId)
             )
         )
     }
@@ -41,11 +39,9 @@ class NoticeApi(
     fun readNotice(
         @CurrentUser user: User,
         @PathVariable noticeId: Long
-    ): ApiResponse<NoticeReadResponse> {
+    ): ApiResponse<NoticeResponse> {
         return ApiResponse.success(
-            NoticeReadResponse.from(
-                noticeService.readNotice(user.id, NoticeId(noticeId))
-            )
+            noticeService.readNotice(user.id, NoticeId(noticeId))
         )
     }
 
@@ -54,15 +50,13 @@ class NoticeApi(
         @CurrentUser user: User,
         @PathVariable teamId: Long,
         page: Page = Page(1, 10)
-    ): ApiResponse<PageResult<NoticeReadResponse>> {
+    ): ApiResponse<PageResult<NoticeResponse>> {
         return ApiResponse.success(
             noticeService.readNoticePage(
                 user.id,
                 TeamId(teamId),
                 PageRequest.of(page.page?.minus(1) ?: 0, page.size ?: 10)
-            )
-                .map { NoticeReadResponse.from(it) }
-                .let { PageResult.of(it.content, it.totalPages, it.hasNext()) }
+            ).let { PageResult.of(it.content, it.totalPages, it.hasNext()) }
         )
     }
 
@@ -71,15 +65,13 @@ class NoticeApi(
         @CurrentUser user: User,
         @PathVariable noticeId: Long,
         @RequestBody request: NoticeUpdateRequest
-    ): ApiResponse<NoticeReadResponse> {
+    ): ApiResponse<NoticeResponse> {
         return ApiResponse.success(
-            NoticeReadResponse.from(
-                noticeService.updateNotice(
-                    user = user,
-                    noticeId = NoticeId(noticeId),
-                    title = request.title,
-                    detail = request.detail
-                )
+            noticeService.updateNotice(
+                user = user,
+                noticeId = NoticeId(noticeId),
+                title = request.title,
+                detail = request.detail
             )
         )
     }

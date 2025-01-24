@@ -2,6 +2,7 @@ package com.jipsa.balearn.domain.team_user
 
 import com.jipsa.balearn.common.dto.File
 import com.jipsa.balearn.domain.team.TeamId
+import com.jipsa.balearn.domain.team_user.exception.CustomTeamUserException
 import com.jipsa.balearn.domain.user.UserId
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -35,9 +36,13 @@ class TeamUserService(
     }
 
     fun changeRole(userId: UserId, teamId: TeamId, teamUserId: TeamUserId, role: TeamUserRole): TeamUser {
+        teamUserValidator.validOwner(teamId, userId)
+
         val teamUser = teamUserReader.read(teamUserId)
 
-        teamUserValidator.validOwner(teamId, userId)
+        if (teamUser.profile.role == TeamUserRole.OWNER) {
+            throw CustomTeamUserException.OwnerCannotBeModifiedException
+        }
 
         return teamUserUpdater.update(teamUser, role)
     }
