@@ -123,7 +123,7 @@ class TeamService(
         val team = teamReader.read(teamId)
         val imgUrl = teamImageAppender.append(image)
 
-        teamGoalUpdater.updateAll(teamGoalsUpdateRequest)
+        teamGoalUpdater.updateAll(teamGoalsUpdateRequest, team)
 
         return teamUpdater.update(
             team = team,

@@ -79,7 +79,7 @@ class TeamUserApi(
         val teamUserRole = when (role) {
             "leader" -> TeamUserRole.LEADER
             "member" -> TeamUserRole.MEMBER
-            else -> throw IllegalArgumentException("Invalid role")
+            else -> throw IllegalArgumentException("존재하지 않는 팀 역할입니다.")
         }
 
         return ApiResponse.success(
