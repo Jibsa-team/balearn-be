@@ -51,4 +51,11 @@ sealed class CustomTeamUserException(errorCode: TeamUserErrorCode) : CustomExcep
 
         val EXCEPTION: CustomTeamUserException = TeamUserPermissionDeniedException
     }
+
+    data object OwnerCannotBeModifiedException :
+        CustomTeamUserException(TeamUserErrorCode.OWNER_CANNOT_BE_MODIFIED) {
+        private fun readResolve(): Any = OwnerCannotBeModifiedException
+
+        val EXCEPTION: CustomTeamUserException = OwnerCannotBeModifiedException
+    }
 }
