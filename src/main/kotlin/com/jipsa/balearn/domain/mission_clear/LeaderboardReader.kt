@@ -2,6 +2,7 @@ package com.jipsa.balearn.domain.mission_clear
 
 import com.jipsa.balearn.api.mission_clear.dto.LeaderboardResponse
 import com.jipsa.balearn.domain.team.TeamId
+import com.jipsa.balearn.domain.team_user.TeamUser
 import com.jipsa.balearn.domain.team_user.TeamUserId
 import com.jipsa.balearn.domain.team_user.TeamUserReader
 import com.jipsa.balearn.infra.redis.repository.RedisRepository
@@ -40,5 +41,21 @@ class LeaderboardReader(
                 score = score
             )
         } ?: emptyList()
+    }
+
+    fun read(teamUser: TeamUser): LeaderboardResponse {
+        val score = redisRepository.getZSetScore(
+            redisRepository.generateLeaderboardKey(teamUser.team.id.value),
+            teamUser.user.id.value.toString()
+        ) ?: 0.0
+        val rank = redisRepository.getZSetRank(
+            redisRepository.generateLeaderboardKey(teamUser.team.id.value),
+            teamUser.user.id.value.toString()
+        ) ?: 0
+        return LeaderboardResponse.from(
+            rank = rank.toInt() + 1,
+            teamUser = teamUser,
+            score = score.toInt()
+        )
     }
 }

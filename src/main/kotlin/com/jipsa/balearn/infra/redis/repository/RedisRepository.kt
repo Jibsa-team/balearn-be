@@ -71,6 +71,10 @@ class RedisRepository(
         return operationZSet.score(key, value)
     }
 
+    fun getZSetRank(key: String, value: String): Long? {
+        return operationZSet.reverseRank(key, value)
+    }
+
     fun getTopZSet(key: String, topN: Int = 5): Set<ZSetOperations.TypedTuple<String>>? {
         return operationZSet.reverseRangeWithScores(key, 0, (topN - 1).toLong())
     }

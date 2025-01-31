@@ -57,4 +57,9 @@ class MissionClearService(
     fun readLeaderboard(teamId: TeamId, topN: Int): List<LeaderboardResponse> {
         return leaderboardReader.read(teamId, topN)
     }
+
+    fun readMyRank(teamId: TeamId, user: User): LeaderboardResponse {
+        val teamUser = teamUserReader.readBy(teamId, user.id)
+        return leaderboardReader.read(teamUser)
+    }
 }

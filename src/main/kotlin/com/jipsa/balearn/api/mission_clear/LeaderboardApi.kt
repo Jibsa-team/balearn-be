@@ -25,6 +25,16 @@ class LeaderboardApi(
         return ApiResponse.success(missionClearService.readLeaderboard(TeamId(teamId), top ?: 5))
     }
 
+    @GetMapping("/{teamId}/me")
+    fun readMyLeaderboard(
+        @CurrentUser user: User,
+        @PathVariable teamId: Long
+    ): ApiResponse<LeaderboardResponse> {
+        return ApiResponse.success(
+            missionClearService.readMyRank(TeamId(teamId), user)
+        )
+    }
+
     @PostMapping("/{teamId}/clear/{missionId}")
     fun createClear(
         @CurrentUser user: User,
