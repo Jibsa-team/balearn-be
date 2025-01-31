@@ -17,12 +17,15 @@ class TeamUserAppender(
 ) {
     fun append(teamUser: TeamUser): TeamUser {
         teamUserValidator.isExistTeamUser(teamUser.team.id, teamUser.user.id)
+
+        val newTeamUser = teamUserRepository.save(teamUser)
+
         redisRepository.addZSetScore(
-            key = redisRepository.generateLeaderboardKey(teamUser.team.id.value),
-            value = teamUser.id.value.toString(),
+            key = redisRepository.generateLeaderboardKey(newTeamUser.team.id.value),
+            value = newTeamUser.id.value.toString(),
             score = 0.0
         )
-        return teamUserRepository.save(teamUser)
+        return newTeamUser
     }
 
     fun join(inviteCode: String, user: User): TeamUser {
