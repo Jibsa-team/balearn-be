@@ -22,4 +22,18 @@ class MissionClearDeleter(
             score = 50.0
         )
     }
+
+    fun deleteAll(teamUserId: TeamUserId, missionIds: List<MissionId>) {
+        missionIds.forEach {
+            if (!missionClearRepository.existsById(it, teamUserId)) {
+                throw CustomMissionClearException.AlreadyMissionNotClearException
+            }
+            redisRepository.minusZSetScore(
+                key = redisRepository.generateLeaderboardKey(teamUserId.value),
+                value = teamUserId.value.toString(),
+                score = 50.0
+            )
+        }
+        missionClearRepository.deleteAllById(teamUserId, missionIds)
+    }
 }
