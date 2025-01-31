@@ -32,7 +32,7 @@ class MissionClearService(
     @Transactional
     fun deleteMissionClear(teamId: TeamId, user: User, missionId: MissionId) {
         val teamUser = teamUserReader.readBy(teamId, user.id)
-        missionClearDeleter.delete(teamUser.id, missionId)
+        missionClearDeleter.delete(teamUser, missionId)
     }
 
     @Transactional
@@ -50,7 +50,7 @@ class MissionClearService(
             })
         }
 
-        deleteIds?.let { missionClearDeleter.deleteAll(teamUser.id, it) }
+        deleteIds?.let { missionClearDeleter.deleteAll(teamUser, it) }
     }
 
 
