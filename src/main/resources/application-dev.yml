@@ -26,6 +26,11 @@ spring:
     password: ${DATABASE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  elasticsearch:
+    uris: http://${elasticsearch.host}:${elasticsearch.port}  # Elasticsearch 서버 주소
+    connection-timeout: 5s
+    socket-timeout: 10s
+
 redis:
   host: ${REDIS_HOST}
   port: 6379
@@ -35,7 +40,7 @@ logstash:
   port: 5000
 
 elasticsearch:
-  host: balearn-es
+  host: ${ES_HOST}
   port: 9200
 
 kibana:
