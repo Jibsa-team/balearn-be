@@ -7,6 +7,7 @@ import com.jipsa.balearn.common.api.ApiResponse
 import com.jipsa.balearn.common.dto.File
 import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.team.TeamService
+import com.jipsa.balearn.domain.team_goal.TeamGoalId
 import com.jipsa.balearn.domain.user.User
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -81,7 +82,8 @@ class TeamApi(
                     description = request.description,
                     image = image?.let { File.from(it) },
                     user = user,
-                    teamGoalsUpdateRequest = request.goals
+                    teamGoalsUpdateRequest = request.goals,
+                    deleteTeamGoalIds = request.deleteGoals?.map { TeamGoalId(it) }
                 )
             )
         )

@@ -59,12 +59,20 @@ class RedisRepository(
         operationZSet.incrementScore(key, value, score)
     }
 
+    fun deleteZSet(key: String, value: String) {
+        operationZSet.remove(key, value)
+    }
+
     fun minusZSetScore(key: String, value: String, score: Double) {
         operationZSet.incrementScore(key, value, -score)
     }
 
     fun getZSetScore(key: String, value: String): Double? {
         return operationZSet.score(key, value)
+    }
+
+    fun getZSetRank(key: String, value: String): Long? {
+        return operationZSet.reverseRank(key, value)
     }
 
     fun getTopZSet(key: String, topN: Int = 5): Set<ZSetOperations.TypedTuple<String>>? {
@@ -75,5 +83,5 @@ class RedisRepository(
     fun generateLoginTokenKey(userId: UserId): String = "$LOGIN_TOKEN_KEY_PREFIX${userId.value}"
     fun generateBlackListTokenKey(accessToken: String): String = "$BLACK_LIST_TOKEN_KEY_PREFIX${accessToken}"
     fun generateTeamInviteCodeKey(inviteCode: String): String = "$TEAM_INVITE_CODE_KEY_PREFIX${inviteCode}"
-    fun generateLeaderboardKey(leaderboardId: Long): String = "$LEADERBOARD_KEY_PREFIX${leaderboardId}"
+    fun generateLeaderboardKey(teamId: Long): String = "$LEADERBOARD_KEY_PREFIX${teamId}"
 }

@@ -20,4 +20,18 @@ class MissionClearAppender(
         )
         return missionClearRepository.save(missionClear)
     }
+
+    fun appendAll(missionClearList: List<MissionClear>): List<MissionClear> {
+        missionClearList.forEach { missionClear ->
+            if (missionClearRepository.existsById(missionClear.missionClearId)) {
+                throw CustomMissionClearException.AlreadyMissionClearException
+            }
+            redisRepository.addZSetScore(
+                key = redisRepository.generateLeaderboardKey(missionClear.teamUser.team.id.value),
+                value = missionClear.teamUser.id.value.toString(),
+                score = 50.0
+            )
+        }
+        return missionClearRepository.saveAll(missionClearList)
+    }
 }

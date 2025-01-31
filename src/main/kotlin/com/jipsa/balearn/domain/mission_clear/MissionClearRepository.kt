@@ -14,4 +14,6 @@ interface MissionClearRepository {
     fun deleteById(missionId: MissionId, teamUserId: TeamUserId)
     fun deleteByMissionId(missionId: MissionId)
     fun deleteByTeamUserId(teamUserId: TeamUserId)
+    fun saveAll(missionClears: List<MissionClear>): List<MissionClear>
+    fun deleteAllById(teamUserId: TeamUserId, missionIds: List<MissionId>)
 }

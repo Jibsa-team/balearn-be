@@ -35,7 +35,31 @@ class MissionClearService(
         missionClearDeleter.delete(teamUser.id, missionId)
     }
 
+    @Transactional
+    fun appendMissionClears(teamId: TeamId, user: User, createIds: List<MissionId>?, deleteIds: List<MissionId>?) {
+        val teamUser = teamUserReader.readBy(teamId, user.id)
+
+        createIds?.let {
+            missionClearAppender.appendAll(it.map { missionId ->
+                val mission = missionReader.read(missionId)
+                MissionClear(
+                    missionClearId = MissionClearId(missionId, teamUser.id),
+                    mission = mission,
+                    teamUser = teamUser
+                )
+            })
+        }
+
+        deleteIds?.let { missionClearDeleter.deleteAll(teamUser.id, it) }
+    }
+
+
     fun readLeaderboard(teamId: TeamId, topN: Int): List<LeaderboardResponse> {
         return leaderboardReader.read(teamId, topN)
+    }
+
+    fun readMyRank(teamId: TeamId, user: User): LeaderboardResponse {
+        val teamUser = teamUserReader.readBy(teamId, user.id)
+        return leaderboardReader.read(teamUser)
     }
 }

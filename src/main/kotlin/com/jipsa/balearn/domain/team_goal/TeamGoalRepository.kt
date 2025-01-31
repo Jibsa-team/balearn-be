@@ -10,4 +10,5 @@ interface TeamGoalRepository {
     fun delete(teamGoal: TeamGoal)
     fun deleteById(teamGoalId: TeamGoalId)
     fun deleteByTeamId(teamId: TeamId)
+    fun deleteAllById(teamGoals: List<TeamGoalId>)
 }

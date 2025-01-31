@@ -1,7 +1,6 @@
 package com.jipsa.balearn.domain.team_user
 
 import com.jipsa.balearn.domain.schedule.exception.CustomTeamException
-import com.jipsa.balearn.domain.team.Team
 import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.team.TeamRepository
 import com.jipsa.balearn.domain.team_user.exception.CustomTeamUserException
@@ -18,6 +17,11 @@ class TeamUserAppender(
 ) {
     fun append(teamUser: TeamUser): TeamUser {
         teamUserValidator.isExistTeamUser(teamUser.team.id, teamUser.user.id)
+        redisRepository.addZSetScore(
+            key = redisRepository.generateLeaderboardKey(teamUser.team.id.value),
+            value = teamUser.id.value.toString(),
+            score = 0.0
+        )
         return teamUserRepository.save(teamUser)
     }
 

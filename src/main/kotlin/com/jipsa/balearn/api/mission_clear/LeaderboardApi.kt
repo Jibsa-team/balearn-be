@@ -3,6 +3,7 @@ package com.jipsa.balearn.api.mission_clear
 import com.jipsa.balearn.api.global.annotation.CurrentUser
 import com.jipsa.balearn.api.mission_clear.dto.LeaderboardResponse
 import com.jipsa.balearn.api.mission_clear.dto.MissionClearResponse
+import com.jipsa.balearn.api.mission_clear.dto.MissionListRequest
 import com.jipsa.balearn.common.api.ApiResponse
 import com.jipsa.balearn.domain.mission.MissionId
 import com.jipsa.balearn.domain.mission_clear.MissionClearService
@@ -24,6 +25,16 @@ class LeaderboardApi(
         return ApiResponse.success(missionClearService.readLeaderboard(TeamId(teamId), top ?: 5))
     }
 
+    @GetMapping("/{teamId}/me")
+    fun readMyLeaderboard(
+        @CurrentUser user: User,
+        @PathVariable teamId: Long
+    ): ApiResponse<LeaderboardResponse> {
+        return ApiResponse.success(
+            missionClearService.readMyRank(TeamId(teamId), user)
+        )
+    }
+
     @PostMapping("/{teamId}/clear/{missionId}")
     fun createClear(
         @CurrentUser user: User,
@@ -33,6 +44,22 @@ class LeaderboardApi(
         return ApiResponse.success(
             MissionClearResponse.from(
                 missionClearService.appendMissionClear(TeamId(teamId), user, MissionId(missionId))
+            )
+        )
+    }
+
+    @PostMapping("/{teamId}/clear")
+    fun createClears(
+        @CurrentUser user: User,
+        @PathVariable teamId: Long,
+        @RequestBody missionList: MissionListRequest
+    ): ApiResponse<Unit> {
+        return ApiResponse.success(
+            missionClearService.appendMissionClears(
+                teamId = TeamId(teamId),
+                user = user,
+                createIds = missionList.createIds?.map { MissionId(it) },
+                deleteIds = missionList.deleteIds?.map { MissionId(it) }
             )
         )
     }

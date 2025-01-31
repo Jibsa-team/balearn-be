@@ -34,6 +34,11 @@ class MissionClearRepositoryAdaptor(
         ).toDomain()
     }
 
+    override fun saveAll(missionClears: List<MissionClear>): List<MissionClear> {
+        return missionClearJpaRepository.saveAll(missionClears.map { MissionClearEntity.from(it) })
+            .map { it.toDomain() }
+    }
+
     override fun existsById(missionClearId: MissionClearId): Boolean {
         return missionClearJpaRepository.existsById(MissionClearEntityId.from(missionClearId))
     }
@@ -56,5 +61,9 @@ class MissionClearRepositoryAdaptor(
 
     override fun deleteByTeamUserId(teamUserId: TeamUserId) {
         missionClearJpaRepository.deleteByMissionClearId_TeamUserId(teamUserId.value)
+    }
+
+    override fun deleteAllById(teamUserId: TeamUserId, missionIds: List<MissionId>) {
+        missionClearJpaRepository.deleteAllById(missionIds.map { MissionClearEntityId(it, teamUserId) })
     }
 }

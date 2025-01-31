@@ -18,4 +18,8 @@ class TeamGoalDeleter(
     fun deleteBy(teamId: TeamId) {
         teamGoalRepository.deleteByTeamId(teamId)
     }
+
+    fun deleteAllBy(teamGoalIds: List<TeamGoalId>) {
+        teamGoalRepository.deleteAllById(teamGoalIds)
+    }
 }
