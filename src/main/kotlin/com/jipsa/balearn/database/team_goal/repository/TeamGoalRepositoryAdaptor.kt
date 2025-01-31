@@ -39,4 +39,8 @@ class TeamGoalRepositoryAdaptor(
     override fun deleteByTeamId(teamId: TeamId) {
         teamGoalJpaRepository.deleteByTeam_Id(teamId.value)
     }
+
+    override fun deleteAllById(teamGoals: List<TeamGoalId>) {
+        teamGoalJpaRepository.deleteAllById(teamGoals.map { it.value })
+    }
 }
