@@ -17,7 +17,7 @@ class MissionClearDeleter(
         }
         missionClearRepository.deleteById(missionId, teamUser.id)
         redisRepository.minusZSetScore(
-            key = redisRepository.generateLeaderboardKey(teamUser.id.value),
+            key = redisRepository.generateLeaderboardKey(teamUser.team.id.value),
             value = teamUser.id.value.toString(),
             score = 50.0
         )
@@ -29,7 +29,7 @@ class MissionClearDeleter(
                 throw CustomMissionClearException.AlreadyMissionNotClearException
             }
             redisRepository.minusZSetScore(
-                key = redisRepository.generateLeaderboardKey(teamUser.id.value),
+                key = redisRepository.generateLeaderboardKey(teamUser.team.id.value),
                 value = teamUser.id.value.toString(),
                 score = 50.0
             )
