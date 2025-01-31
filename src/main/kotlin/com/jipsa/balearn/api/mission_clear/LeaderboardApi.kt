@@ -39,7 +39,7 @@ class LeaderboardApi(
     }
 
     @PostMapping("/{teamId}/clear")
-    fun createClear(
+    fun createClears(
         @CurrentUser user: User,
         @PathVariable teamId: Long,
         @RequestBody missionList: MissionListRequest
