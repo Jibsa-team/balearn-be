@@ -42,7 +42,7 @@ class ChatDocument(
             sender = sender.toDomain(),
             createdAt = createdAt,
             modifiedAt = modifiedAt,
-            _chatInfo = ChatInfo(message, type)
+            chatInfo = ChatInfo(message, type)
         )
     }
 
