@@ -1,7 +1,6 @@
 package com.jipsa.balearn.api.user
 
 import com.jipsa.balearn.api.global.annotation.CurrentUser
-import com.jipsa.balearn.api.team.dto.TeamCreateRequest
 import com.jipsa.balearn.api.user.dto.UserResponse
 import com.jipsa.balearn.api.user.dto.UserUpdateRequest
 import com.jipsa.balearn.common.api.ApiResponse

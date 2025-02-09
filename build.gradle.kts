@@ -42,6 +42,7 @@ dependencies {
 
     // OAuth2
     implementation("org.springframework.boot:spring-boot-starter-security")
+//    implementation("org.springframework.security:spring-security-messaging")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // JWT
@@ -52,6 +53,13 @@ dependencies {
     // GCS
     implementation("org.springframework.cloud", "spring-cloud-gcp-starter", "1.2.5.RELEASE")
     implementation("org.springframework.cloud", "spring-cloud-gcp-storage", "1.2.5.RELEASE")
+
+    // WebSocket
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+
+    // json
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
 }
 
 kotlin {
