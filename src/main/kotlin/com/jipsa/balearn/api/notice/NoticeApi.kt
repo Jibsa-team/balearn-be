@@ -41,7 +41,7 @@ class NoticeApi(
         @PathVariable noticeId: Long
     ): ApiResponse<NoticeResponse> {
         return ApiResponse.success(
-            noticeService.readNotice(user.id, NoticeId(noticeId))
+            noticeService.readNotice(user, NoticeId(noticeId))
         )
     }
 
@@ -53,7 +53,7 @@ class NoticeApi(
     ): ApiResponse<PageResult<NoticeResponse>> {
         return ApiResponse.success(
             noticeService.readNoticePage(
-                user.id,
+                user,
                 TeamId(teamId),
                 PageRequest.of(page.page?.minus(1) ?: 0, page.size ?: 10)
             ).let { PageResult.of(it.content, it.totalPages, it.hasNext()) }
