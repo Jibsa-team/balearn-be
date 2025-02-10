@@ -26,7 +26,16 @@ class WebSocketConfig(
         registry
             .addEndpoint("/ws") // 엔드포인트: /ws
             .setAllowedOriginPatterns("*")
-            .setAllowedOrigins("*")
+            .setAllowedOrigins(
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://dev.balearn.o-r.kr:3000",
+                "https://balearn.o-r.kr",
+                "https://be.balearn.o-r.kr",
+                "https://*.balearn.o-r.kr",
+                "https://balearn-fe.vercel.app",
+                "https://*.balearn-fe.vercel.app"
+            )
             .withSockJS()
     }
 }
