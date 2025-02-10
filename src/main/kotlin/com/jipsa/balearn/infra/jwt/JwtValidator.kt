@@ -39,6 +39,17 @@ class JwtValidator(
         return null
     }
 
+    fun resolveToken(token: String): String? {
+        if (StringUtils.hasText(token)) {
+            if (token.startsWith(BalearnConstants.BEARER)) {
+                return token.substring(7).trim { it <= ' ' }
+            }
+            return token
+        }
+
+        return null
+    }
+
     fun validateToken(token: String) {
         try {
             Jwts.parserBuilder()

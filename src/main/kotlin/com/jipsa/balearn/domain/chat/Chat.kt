@@ -3,16 +3,17 @@ package com.jipsa.balearn.domain.chat
 import com.jipsa.balearn.domain.global.Base
 import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.team_user.TeamUser
+import java.io.Serializable
 import java.time.LocalDateTime
 
 class Chat(
     val id: ChatId = ChatId(),
     val teamId: TeamId,
     val sender: Sender,
-    private var _chatInfo: ChatInfo,
+    val chatInfo: ChatInfo,
     createdAt: LocalDateTime? = null,
     modifiedAt: LocalDateTime? = null,
-) : Base(
+) : Serializable, Base(
     createdAt = createdAt,
     modifiedAt = modifiedAt
 ) {
@@ -26,18 +27,8 @@ class Chat(
         id = id,
         teamId = teamUser.team.id,
         sender = Sender.from(teamUser),
-        _chatInfo = chatInfo,
+        chatInfo = chatInfo,
         createdAt = createdAt,
         modifiedAt = modifiedAt
     )
-
-    val chatInfo: ChatInfo
-        get() = _chatInfo
-
-    fun updateMessage(message: String) {
-        this._chatInfo = ChatInfo(
-            message = message,
-            type = _chatInfo.type
-        )
-    }
 }

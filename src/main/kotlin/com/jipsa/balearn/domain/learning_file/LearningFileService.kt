@@ -4,6 +4,7 @@ import com.jipsa.balearn.api.learning_file.dto.LearningFileResponse
 import com.jipsa.balearn.common.dto.File
 import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.team.TeamReader
+import com.jipsa.balearn.domain.team_user.TeamUser
 import com.jipsa.balearn.domain.team_user.TeamUserReader
 import com.jipsa.balearn.domain.team_user.TeamUserValidator
 import com.jipsa.balearn.domain.user.User
@@ -61,22 +62,38 @@ class LearningFileService(
         val learningFile = learningFileReader.read(learningFileId)
         teamUserValidator.validTeamUser(learningFile.team.id, user.id)
 
-        return LearningFileResponse.from(
-            learningFile = learningFile,
-            createdBy = learningFile.createdBy?.let { teamUserReader.readBy(learningFile.team.id, it) },
-            modifiedBy = learningFile.modifiedBy?.let { teamUserReader.readBy(learningFile.team.id, it) }
-        )
+        return try {
+            LearningFileResponse.from(
+                learningFile = learningFile,
+                createdBy = learningFile.createdBy?.let { teamUserReader.readBy(learningFile.team.id, it) },
+                modifiedBy = learningFile.modifiedBy?.let { teamUserReader.readBy(learningFile.team.id, it) }
+            )
+        } catch (e: Exception) {
+            LearningFileResponse.from(
+                learningFile = learningFile,
+                createdBy = TeamUser.ex_member(learningFile.team, user),
+                modifiedBy = TeamUser.ex_member(learningFile.team, user)
+            )
+        }
     }
 
     fun readLearningFilesPage(teamId: TeamId, user: User, pageable: Pageable): List<LearningFileResponse> {
         teamUserValidator.validTeamUser(teamId, user.id)
 
-        return learningFileReader.readAllBy(teamId, pageable).map { file ->
-            LearningFileResponse.from(
-                learningFile = file,
-                createdBy = file.createdBy?.let { teamUserReader.readBy(teamId, it) },
-                modifiedBy = file.modifiedBy?.let { teamUserReader.readBy(teamId, it) }
-            )
+        return learningFileReader.readAllBy(teamId, pageable).map { learningFile ->
+            try {
+                LearningFileResponse.from(
+                    learningFile = learningFile,
+                    createdBy = learningFile.createdBy?.let { teamUserReader.readBy(learningFile.team.id, it) },
+                    modifiedBy = learningFile.modifiedBy?.let { teamUserReader.readBy(learningFile.team.id, it) }
+                )
+            } catch (e: Exception) {
+                LearningFileResponse.from(
+                    learningFile = learningFile,
+                    createdBy = TeamUser.ex_member(learningFile.team, user),
+                    modifiedBy = TeamUser.ex_member(learningFile.team, user)
+                )
+            }
         }
     }
 }

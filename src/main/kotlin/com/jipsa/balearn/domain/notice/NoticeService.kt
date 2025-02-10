@@ -2,6 +2,7 @@ package com.jipsa.balearn.domain.notice
 
 import com.jipsa.balearn.api.notice.dto.NoticeResponse
 import com.jipsa.balearn.domain.team.TeamId
+import com.jipsa.balearn.domain.team_user.TeamUser
 import com.jipsa.balearn.domain.team_user.TeamUserReader
 import com.jipsa.balearn.domain.team_user.TeamUserValidator
 import com.jipsa.balearn.domain.user.User
@@ -39,25 +40,39 @@ class NoticeService(
         return NoticeResponse.from(newNotice, teamUser, teamUser)
     }
 
-    fun readNotice(userId: UserId, noticeId: NoticeId): NoticeResponse {
+    fun readNotice(user: User, noticeId: NoticeId): NoticeResponse {
         val notice = noticeReader.read(noticeId)
 
-        teamUserValidator.validTeamUser(notice.team.id, userId)
+        teamUserValidator.validTeamUser(notice.team.id, user.id)
 
-        val createdBy = notice.createdBy?.let { teamUserReader.readBy(notice.team.id, it) }
-        val modifiedBy = notice.modifiedBy?.let { teamUserReader.readBy(notice.team.id, it) }
-
-        return NoticeResponse.from(notice, createdBy, modifiedBy)
-    }
-
-    fun readNoticePage(userId: UserId, teamId: TeamId, pageable: Pageable): Page<NoticeResponse> {
-        teamUserValidator.validTeamUser(teamId, userId)
-
-        return noticeReader.readBy(teamId, pageable).map { notice ->
+        try {
             val createdBy = notice.createdBy?.let { teamUserReader.readBy(notice.team.id, it) }
             val modifiedBy = notice.modifiedBy?.let { teamUserReader.readBy(notice.team.id, it) }
+            return NoticeResponse.from(notice, createdBy, modifiedBy)
+        } catch (e: Exception) {
+            return NoticeResponse.from(
+                notice,
+                TeamUser.ex_member(notice.team, user),
+                TeamUser.ex_member(notice.team, user)
+            )
+        }
+    }
 
-            NoticeResponse.from(notice, createdBy, modifiedBy)
+    fun readNoticePage(user: User, teamId: TeamId, pageable: Pageable): Page<NoticeResponse> {
+        teamUserValidator.validTeamUser(teamId, user.id)
+
+        return noticeReader.readBy(teamId, pageable).map { notice ->
+            try {
+                val createdBy = notice.createdBy?.let { teamUserReader.readBy(notice.team.id, it) }
+                val modifiedBy = notice.modifiedBy?.let { teamUserReader.readBy(notice.team.id, it) }
+                NoticeResponse.from(notice, createdBy, modifiedBy)
+            } catch (e: Exception) {
+                NoticeResponse.from(
+                    notice,
+                    TeamUser.ex_member(notice.team, user),
+                    TeamUser.ex_member(notice.team, user)
+                )
+            }
         }
     }
 

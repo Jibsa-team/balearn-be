@@ -2,7 +2,6 @@ package com.jipsa.balearn.api.global.annotation
 
 import com.jipsa.balearn.domain.user.User
 import com.jipsa.balearn.domain.user.UserReader
-import com.jipsa.balearn.domain.user.UserRepository
 import com.jipsa.balearn.domain.user.exception.CustomUserException
 import com.jipsa.balearn.infra.oauth2.CustomOAuth2UserDetail
 import org.springframework.core.MethodParameter

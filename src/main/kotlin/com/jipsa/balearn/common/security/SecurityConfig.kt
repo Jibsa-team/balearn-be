@@ -26,7 +26,7 @@ class SecurityConfig(
 ) {
 
     private val loginUrls = arrayOf("/oauth2", "/login/oauth2/code", "/api/auth/reissue")
-    private val permitUrls = arrayOf("/ws/info", "/ws", "/h2-console", "/h2-console/**", "/actuator/*")
+    private val permitUrls = arrayOf("/ws", "/ws/**", "/h2-console", "/h2-console/**", "/actuator/*")
     private val swaggerUrls =
         arrayOf("/", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/swagger-resources/**", "/webjars/**")
 

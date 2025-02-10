@@ -56,5 +56,17 @@ class TeamUser(
                 user = user
             )
         }
+
+        fun ex_member(team: Team, user: User): TeamUser {
+            return TeamUser(
+                _profile = TeamUserProfile(
+                    nickname = "탈퇴한 사용자",
+                    profileImageUrl = "https://cdn.balearn.o-r.kr/profile/default-user.jpg",
+                    role = TeamUserRole.EX_MEMBER
+                ),
+                team = team,
+                user = user,
+            )
+        }
     }
 }

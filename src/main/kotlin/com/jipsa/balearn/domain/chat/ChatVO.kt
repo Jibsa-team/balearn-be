@@ -1,11 +1,12 @@
 package com.jipsa.balearn.domain.chat
 
+import com.fasterxml.jackson.annotation.JsonValue
 import com.jipsa.balearn.domain.team_user.TeamUser
 import com.jipsa.balearn.domain.team_user.TeamUserId
 import com.jipsa.balearn.domain.team_user.TeamUserRole
 
 @JvmInline
-value class ChatId(val value: Long = 0)
+value class ChatId(@JsonValue val value: Long = 0)
 
 data class ChatInfo(
     val message: String,
