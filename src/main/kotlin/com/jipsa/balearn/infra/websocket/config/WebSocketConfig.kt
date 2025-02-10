@@ -27,6 +27,6 @@ class WebSocketConfig(
             .addEndpoint("/ws") // 엔드포인트: /ws
             .setAllowedOriginPatterns("*")
             .setAllowedOrigins("*")
-        //                .withSockJS();
+            .withSockJS()
     }
 }
