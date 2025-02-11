@@ -11,8 +11,8 @@ class Chat(
     val teamId: TeamId,
     val sender: Sender,
     val chatInfo: ChatInfo,
-    createdAt: LocalDateTime? = null,
-    modifiedAt: LocalDateTime? = null,
+    createdAt: LocalDateTime,
+    modifiedAt: LocalDateTime,
 ) : Serializable, Base(
     createdAt = createdAt,
     modifiedAt = modifiedAt
@@ -21,8 +21,8 @@ class Chat(
         id: ChatId = ChatId(),
         teamUser: TeamUser,
         chatInfo: ChatInfo,
-        createdAt: LocalDateTime? = null,
-        modifiedAt: LocalDateTime? = null,
+        createdAt: LocalDateTime,
+        modifiedAt: LocalDateTime,
     ) : this(
         id = id,
         teamId = teamUser.team.id,

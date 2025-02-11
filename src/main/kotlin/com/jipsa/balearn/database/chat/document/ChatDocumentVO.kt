@@ -1,5 +1,6 @@
 package com.jipsa.balearn.database.chat.document
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.jipsa.balearn.domain.chat.Sender
 import com.jipsa.balearn.domain.team_user.TeamUserId
 import com.jipsa.balearn.domain.team_user.TeamUserRole
@@ -17,6 +18,7 @@ data class SenderVO(
     val profileImageUrl: String,
 
     @Field(type = FieldType.Keyword)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     val role: TeamUserRole
 ) {
     fun toDomain(): Sender {
