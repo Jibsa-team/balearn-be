@@ -1,0 +1,45 @@
+{
+  "dynamic": "strict",
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "teamId": {
+      "type": "long"
+    },
+    "sender": {
+      "properties": {
+        "id": {
+          "type": "long"
+        },
+        "nickname": {
+          "type": "text"
+        },
+        "profileImageUrl": {
+          "type": "text"
+        },
+        "role": {
+          "type": "keyword"
+        }
+      }
+    },
+    "createdAt": {
+      "type": "date_nanos",
+      "format": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+    },
+    "modifiedAt": {
+      "type": "date_nanos",
+      "format": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+    },
+    "message": {
+      "type": "text",
+      "analyzer": "standard"
+    },
+    "messageKeyword": {
+      "type": "keyword"
+    },
+    "type": {
+      "type": "keyword"
+    }
+  }
+}

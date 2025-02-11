@@ -6,7 +6,7 @@ import com.jipsa.balearn.domain.chat.Sender
 import java.time.LocalDateTime
 
 data class ChatResponse(
-    val id: Long,
+    val id: String,
     val teamId: Long,
     val sender: Sender,
     val message: String,
