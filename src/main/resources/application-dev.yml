@@ -48,6 +48,6 @@ kibana:
   port: 5601
 
 frontend:
-  url: https://balearn-fe.vercel.app
+  url: https://balearn.site
 
 
