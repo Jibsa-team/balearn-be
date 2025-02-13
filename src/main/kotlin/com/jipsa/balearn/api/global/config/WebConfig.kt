@@ -21,7 +21,9 @@ class WebConfig(
                 "https://be.balearn.o-r.kr",
                 "https://*.balearn.o-r.kr",
                 "https://balearn-fe.vercel.app",
-                "https://*.balearn-fe.vercel.app"
+                "https://*.balearn-fe.vercel.app",
+                "https://balearn.site",
+                "https://*.balearn.site",
             ) // 주로 프론트에서 사용하는 port 번호
             .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
             .allowedHeaders(
