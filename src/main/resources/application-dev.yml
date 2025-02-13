@@ -49,5 +49,6 @@ kibana:
 
 frontend:
   url: https://balearn.site
+  domain: balearn.site
 
 

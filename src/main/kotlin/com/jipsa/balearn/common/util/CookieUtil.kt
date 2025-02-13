@@ -3,11 +3,15 @@ package com.jipsa.balearn.common.util
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 
 @Component
-class CookieUtil(private val environment: Environment) {
+class CookieUtil(
+    private val environment: Environment,
+    @Value("\${frontend.domain}") private val frontendDomain: String
+) {
 
     companion object {
         private const val DEFAULT_COOKIE_MAX_AGE = 7 * 24 * 60 * 60 // 7일 (초 단위)
@@ -38,6 +42,7 @@ class CookieUtil(private val environment: Environment) {
             if (secure) {
                 setAttribute("SameSite", "None")
             }
+            domain = frontendDomain
         }
         response.addCookie(cookie)
     }
@@ -67,6 +72,7 @@ class CookieUtil(private val environment: Environment) {
             if (secure) {
                 setAttribute("SameSite", "None")
             }
+            domain = frontendDomain
         }
         response.addCookie(cookie)
     }
