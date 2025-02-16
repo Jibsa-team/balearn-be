@@ -49,12 +49,12 @@ kibana:
   host: balearn-kibana
   port: 5601
 
-#frontend:
-#  url: https://balearn.site
-#  domain: balearn.site
-
 frontend:
-  url: http://localhost:3000
-  domain: localhost
+  url: https://balearn.site
+  domain: balearn.site
+
+#frontend:
+#  url: http://localhost:3000
+#  domain: localhost
 
 
