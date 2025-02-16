@@ -2,12 +2,16 @@ package com.jipsa.balearn.infra.redis.repository
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jipsa.balearn.domain.chat.Chat
+import com.jipsa.balearn.domain.team.TeamId
+import com.jipsa.balearn.domain.team_user.TeamUser
+import com.jipsa.balearn.domain.team_user.TeamUserId
 import com.jipsa.balearn.domain.user.UserId
 import org.springframework.data.domain.Pageable
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.ScanOptions
 import org.springframework.data.redis.core.ZSetOperations
 import org.springframework.stereotype.Repository
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 @Repository
@@ -24,10 +28,18 @@ class RedisRepository(
         private const val REFRESH_TOKEN_KEY_PREFIX = "refresh_token:"
         private const val LOGIN_TOKEN_KEY_PREFIX = "login_token:"
         private const val BLACK_LIST_TOKEN_KEY_PREFIX = "black_list_token:"
+
         private const val TEAM_INVITE_CODE_KEY_PREFIX = "team_invite_code:"
+
         private const val LEADERBOARD_KEY_PREFIX = "leaderboard:"
+
         private const val CHAT_KEY_PREFIX = "chat:team:"
         private const val CHAT_BATCH_KEY_PREFIX = "chat:batch:"
+
+        private const val TEAM_USER_KEY_PREFIX = "team_user:"
+        private const val DATA_KEY_PREFIX = "data:"
+        private const val USER_KEY_PREFIX = "user:"
+        private const val TEAM_KEY_PREFIX = "team:"
     }
 
     fun saveValue(key: String, value: String, expirationTime: Long) {
@@ -139,6 +151,60 @@ class RedisRepository(
         operationZSet.removeRange(key, start, end)
     }
 
+    fun cacheTeamUser(teamUser: TeamUser) {
+        val teamUserJson = objectMapper.writeValueAsString(teamUser)
+        operationValue.set(generateTeamUserDataKey(teamUser.id.value), teamUserJson, Duration.ofDays(1))
+        operationSet.add(generateTeamUserIdByUserIdKey(teamUser.user.id.value), teamUser.id.value.toString())
+        operationSet.add(generateTeamUserIdByTeamIdKey(teamUser.team.id.value), teamUser.id.value.toString())
+        operationValue.set(
+            generateTeamUserIdByTeamIdAndUserIdKey(teamUser.team.id.value, teamUser.user.id.value),
+            teamUser.id.value.toString()
+        )
+    }
+
+    fun getTeamUser(teamUserId: TeamUserId): TeamUser? {
+        return operationValue[generateTeamUserDataKey(teamUserId.value)]?.let {
+            objectMapper.readValue(it, TeamUser::class.java)
+        }
+    }
+
+    fun getTeamUserByUserId(userId: UserId): Set<TeamUserId>? {
+        return operationSet.members(generateTeamUserIdByUserIdKey(userId.value))?.map { TeamUserId(it.toLong()) }
+            ?.toSet()
+    }
+
+    fun getTeamUserByTeamId(teamId: TeamId): Set<TeamUserId>? {
+        return operationSet.members(generateTeamUserIdByTeamIdKey(teamId.value))?.map { TeamUserId(it.toLong()) }
+            ?.toSet()
+    }
+
+    fun getTeamUserByTeamIdAndUserId(teamId: TeamId, userId: UserId): TeamUserId? {
+        return operationValue[generateTeamUserIdByTeamIdAndUserIdKey(
+            teamId.value,
+            userId.value
+        )]?.let { TeamUserId(it.toLong()) }
+    }
+
+    fun deleteTeamUserCache(teamUserId: TeamUserId) {
+        val teamUser = getTeamUser(teamUserId)
+        teamUser?.let {
+            redisTemplate.delete(generateTeamUserDataKey(teamUserId.value))
+            operationSet.remove(generateTeamUserIdByUserIdKey(teamUser.user.id.value), teamUserId.value.toString())
+            operationSet.remove(generateTeamUserIdByTeamIdKey(teamUser.team.id.value), teamUserId.value.toString())
+            redisTemplate.delete(
+                generateTeamUserIdByTeamIdAndUserIdKey(
+                    teamUser.team.id.value,
+                    teamUser.user.id.value
+                )
+            )
+        }
+    }
+
+    fun updateTeamUserCache(teamUser: TeamUser) {
+        deleteTeamUserCache(teamUser.id)
+        cacheTeamUser(teamUser)
+    }
+
     fun scanForKeys(pattern: String): List<String> {
         return redisTemplate.execute { connection ->
             val keys = mutableListOf<String>()
@@ -165,4 +231,9 @@ class RedisRepository(
     fun generateChatKey(teamId: Long): String = "$CHAT_KEY_PREFIX$teamId"
     fun generateChatBatchKey(): String = CHAT_BATCH_KEY_PREFIX
     fun generateChatKeyPattern(): String = "$CHAT_KEY_PREFIX*"
+    fun generateTeamUserDataKey(teamUserId: Long): String = "$TEAM_USER_KEY_PREFIX$DATA_KEY_PREFIX$teamUserId"
+    fun generateTeamUserIdByUserIdKey(userId: Long): String = "$TEAM_USER_KEY_PREFIX$USER_KEY_PREFIX$userId"
+    fun generateTeamUserIdByTeamIdKey(teamId: Long): String = "$TEAM_USER_KEY_PREFIX$TEAM_KEY_PREFIX$teamId"
+    fun generateTeamUserIdByTeamIdAndUserIdKey(teamId: Long, userId: Long): String =
+        "$TEAM_USER_KEY_PREFIX$TEAM_KEY_PREFIX$teamId:$USER_KEY_PREFIX$userId"
 }
