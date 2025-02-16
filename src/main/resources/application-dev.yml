@@ -19,6 +19,7 @@ spring:
     redis:
       host: ${redis.host}
       port: ${redis.port}
+      password: ${redis.password}
 
   datasource:
     url: jdbc:mysql://${DATABASE_IP}:3306/${DATABASE_NAME}?useSSL=false&allowPublicKeyRetrieval=true
@@ -34,6 +35,7 @@ spring:
 redis:
   host: ${REDIS_HOST}
   port: 6379
+  password: ${REDIS_PASSWORD}
 
 logstash:
   host: balearn-logstash
@@ -47,12 +49,12 @@ kibana:
   host: balearn-kibana
   port: 5601
 
-#frontend:
-#  url: https://balearn.site
-#  domain: balearn.site
-
 frontend:
-  url: http://localhost:3000
-  domain: localhost
+  url: https://balearn.site
+  domain: balearn.site
+
+#frontend:
+#  url: http://localhost:3000
+#  domain: localhost
 
 

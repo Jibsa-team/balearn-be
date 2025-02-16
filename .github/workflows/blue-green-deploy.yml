@@ -119,6 +119,7 @@ jobs:
             KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
             BACKEND_URL=${{ secrets.BACKEND_URL }}
             REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
             GCP_CDN_DOMAIN=${{ secrets.GCP_CDN_DOMAIN }}
             GCS_KEY=${{ secrets.GCS_KEY }}
             GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
