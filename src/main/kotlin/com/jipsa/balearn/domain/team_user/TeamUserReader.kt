@@ -24,25 +24,11 @@ class TeamUserReader(
     }
 
     fun readBy(teamId: TeamId): List<TeamUser> {
-        return redisRepository.getTeamUserByTeamId(teamId)?.mapNotNull {
-            redisRepository.getTeamUser(it) ?: teamUserRepository.findById(it)?.let { teamUser ->
-                redisRepository.cacheTeamUser(teamUser)
-                teamUser
-            }
-        } ?: teamUserRepository.findByTeamId(teamId).onEach { teamUser ->
-            redisRepository.cacheTeamUser(teamUser)
-        }
+        return teamUserRepository.findByTeamId(teamId).onEach(redisRepository::cacheTeamUser)
     }
 
     fun readBy(userId: UserId): List<TeamUser> {
-        return redisRepository.getTeamUserByUserId(userId)?.mapNotNull {
-            redisRepository.getTeamUser(it) ?: teamUserRepository.findById(it)?.let { teamUser ->
-                redisRepository.cacheTeamUser(teamUser)
-                teamUser
-            }
-        } ?: teamUserRepository.findByUserId(userId).onEach { teamUser ->
-            redisRepository.cacheTeamUser(teamUser)
-        }
+        return teamUserRepository.findByUserId(userId).onEach(redisRepository::cacheTeamUser)
     }
 
     fun readBy(teamId: TeamId, userId: UserId): TeamUser {
