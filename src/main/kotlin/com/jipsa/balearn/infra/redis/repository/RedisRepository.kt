@@ -170,12 +170,12 @@ class RedisRepository(
 
     fun getTeamUserByUserId(userId: UserId): Set<TeamUserId>? {
         return operationSet.members(generateTeamUserIdByUserIdKey(userId.value))?.map { TeamUserId(it.toLong()) }
-            ?.toSet()
+            ?.toSet()?.takeIf { it.isNotEmpty() }
     }
 
     fun getTeamUserByTeamId(teamId: TeamId): Set<TeamUserId>? {
         return operationSet.members(generateTeamUserIdByTeamIdKey(teamId.value))?.map { TeamUserId(it.toLong()) }
-            ?.toSet()
+            ?.toSet()?.takeIf { it.isNotEmpty() }
     }
 
     fun getTeamUserByTeamIdAndUserId(teamId: TeamId, userId: UserId): TeamUserId? {

@@ -1,8 +1,8 @@
 package com.jipsa.balearn.domain.user
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.jipsa.balearn.domain.global.Base
 import java.time.LocalDateTime
-import javax.swing.text.html.HTML.Tag.U
 
 class User(
     val id: UserId = UserId(),
@@ -15,6 +15,7 @@ class User(
     modifiedAt = modifiedAt
 ) {
 
+    @get:JsonProperty("_userProfile")
     val userProfile: UserProfile
         get() = _userProfile
 

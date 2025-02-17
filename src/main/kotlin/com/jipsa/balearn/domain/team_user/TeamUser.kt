@@ -1,5 +1,6 @@
 package com.jipsa.balearn.domain.team_user
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.jipsa.balearn.domain.global.Base
 import com.jipsa.balearn.domain.team.Team
 import com.jipsa.balearn.domain.user.User
@@ -16,6 +17,7 @@ class TeamUser(
     createdAt = createdAt,
     modifiedAt = modifiedAt
 ) {
+    @get:JsonProperty("_profile")
     val profile: TeamUserProfile
         get() = _profile
 

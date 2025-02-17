@@ -1,5 +1,6 @@
 package com.jipsa.balearn.domain.team
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.jipsa.balearn.domain.global.Base
 import com.jipsa.balearn.domain.user.UserId
 import java.time.LocalDateTime
@@ -17,6 +18,7 @@ class Team(
     createdBy = createdBy,
     modifiedBy = modifiedBy
 ) {
+    @get:JsonProperty("_teamInfo")
     val teamInfo: TeamInfo
         get() = _teamInfo
 
