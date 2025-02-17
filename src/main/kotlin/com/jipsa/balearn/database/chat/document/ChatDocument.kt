@@ -25,16 +25,16 @@ class ChatDocument(
     val sender: SenderVO,
 
     @Field(
-        type = FieldType.Date_Nanos,
-        format = [DateFormat.date_hour_minute_second_millis],
-        pattern = ["yyyy-MM-dd'T'HH:mm:ss.SSSSSS"]
+        type = FieldType.Date,
+        pattern = ["uuuu-MM-dd'T'HH:mm:ss.SSSSSS"],
+        format = [DateFormat.strict_date_hour_minute_second_millis, DateFormat.epoch_millis]
     )
     val createdAt: LocalDateTime,
 
     @Field(
-        type = FieldType.Date_Nanos,
-        format = [DateFormat.date_hour_minute_second_millis],
-        pattern = ["yyyy-MM-dd'T'HH:mm:ss.SSSSSS"]
+        type = FieldType.Date,
+        pattern = ["uuuu-MM-dd'T'HH:mm:ss.SSSSSS"],
+        format = [DateFormat.strict_date_hour_minute_second_millis, DateFormat.epoch_millis]
     )
     val modifiedAt: LocalDateTime,
 

@@ -45,9 +45,10 @@ class ChatService(
         val chatList =
             chatReader.readInRedis(teamId, cursor, PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "createdAt")))
         if (chatList.size < size) {
+            val newCursor = chatList.lastOrNull()?.createdAt
             return chatList + chatReader.readInElasticsearch(
                 teamId,
-                cursor,
+                newCursor ?: cursor,
                 PageRequest.of(0, size - chatList.size, Sort.by(Sort.Direction.DESC, "createdAt"))
             )
         }
