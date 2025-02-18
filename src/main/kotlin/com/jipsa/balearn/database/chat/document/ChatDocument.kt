@@ -30,6 +30,7 @@ class ChatDocument(
         pattern = ["uuuu-MM-dd'T'HH:mm:ss.SSSSSS"],
         format = [DateFormat.strict_date_hour_minute_second_millis, DateFormat.epoch_millis]
     )
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     val createdAt: LocalDateTime,
 
     @Field(
@@ -37,6 +38,7 @@ class ChatDocument(
         pattern = ["uuuu-MM-dd'T'HH:mm:ss.SSSSSS"],
         format = [DateFormat.strict_date_hour_minute_second_millis, DateFormat.epoch_millis]
     )
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     val modifiedAt: LocalDateTime,
 
     @Field(type = FieldType.Text, analyzer = "standard")
