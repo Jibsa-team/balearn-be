@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 @Service
 class ChatService(
@@ -26,7 +27,7 @@ class ChatService(
     @Transactional
     fun sendChat(teamId: TeamId, message: String, user: User) {
         val teamUser = teamUserReader.readBy(teamId, user.id)
-        val now = LocalDateTime.now()
+        val now = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
         val chat = Chat(
             teamUser = teamUser,
             chatInfo = ChatInfo(

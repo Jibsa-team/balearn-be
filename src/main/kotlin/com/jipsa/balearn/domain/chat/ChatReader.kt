@@ -6,6 +6,7 @@ import com.jipsa.balearn.infra.redis.repository.RedisRepository
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 @Component
 class ChatReader(
@@ -25,14 +26,18 @@ class ChatReader(
 
     fun readInElasticsearch(
         teamId: TeamId,
-        start: LocalDateTime = LocalDateTime.now().minusDays(3),
-        end: LocalDateTime = LocalDateTime.now(),
+        start: LocalDateTime = LocalDateTime.now().minusDays(3).truncatedTo(ChronoUnit.MICROS),
+        end: LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS),
         pageable: Pageable
     ): List<Chat> {
         return chatRepository.findByTeamIdBetween(teamId, start, end, pageable)
     }
 
     fun readInElasticsearch(teamId: TeamId, cursor: LocalDateTime?, pageable: Pageable): List<Chat> {
-        return chatRepository.findByTeamIdAndCursor(teamId, cursor ?: LocalDateTime.now(), pageable)
+        return chatRepository.findByTeamIdAndCursor(
+            teamId,
+            cursor ?: LocalDateTime.now().truncatedTo(ChronoUnit.MICROS),
+            pageable
+        )
     }
 }

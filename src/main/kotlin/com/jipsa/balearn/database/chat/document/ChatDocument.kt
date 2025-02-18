@@ -9,6 +9,7 @@ import com.jipsa.balearn.domain.team.TeamId
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.*
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 @Document(indexName = "chat")
 @Setting(settingPath = "elasticsearch/chat-settings.json")
@@ -61,7 +62,7 @@ class ChatDocument(
 
     companion object {
         fun from(chat: Chat): ChatDocument {
-            val now = LocalDateTime.now()
+            val now = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
             return ChatDocument(
                 id = chat.id.value,
                 teamId = chat.teamId.value,
