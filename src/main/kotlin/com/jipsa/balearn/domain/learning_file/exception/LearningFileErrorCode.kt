@@ -10,6 +10,7 @@ enum class LearningFileErrorCode(
     private val message: String,
 ) : BaseErrorCode {
     LEARNING_FILE_NOT_FOUND(404, "LEARNING_FILE_001", "해당 학습 파일을 찾을 수 없습니다."),
+    LEARNING_FILE_STORAGE_UNAVAILABLE(503, "LEARNING_FILE_002", "원본 파일 저장소에 연결할 수 없습니다."),
     ;
 
     override val errorReason: ErrorReason

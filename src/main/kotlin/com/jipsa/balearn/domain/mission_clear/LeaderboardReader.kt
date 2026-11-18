@@ -37,20 +37,22 @@ class LeaderboardReader(
             } ?: LeaderboardResponse(
                 rank = index + 1,
                 nickname = "탈퇴한 유저",
-                profileImgUrl = "https://cdn.balearn.o-r.kr/profile/default-user.jpg",
+                profileImgUrl = "/Avatar.png",
                 score = score
             )
         } ?: emptyList()
     }
 
     fun read(teamUser: TeamUser): LeaderboardResponse {
+        val key = redisRepository.generateLeaderboardKey(teamUser.team.id.value)
+        val memberId = teamUser.id.value.toString()
         val score = redisRepository.getZSetScore(
-            redisRepository.generateLeaderboardKey(teamUser.team.id.value),
-            teamUser.user.id.value.toString()
+            key,
+            memberId
         ) ?: 0.0
         val rank = redisRepository.getZSetRank(
-            redisRepository.generateLeaderboardKey(teamUser.team.id.value),
-            teamUser.user.id.value.toString()
+            key,
+            memberId
         ) ?: 0
         return LeaderboardResponse.from(
             rank = rank.toInt() + 1,

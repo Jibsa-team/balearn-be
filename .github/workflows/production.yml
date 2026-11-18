@@ -1,0 +1,108 @@
+name: Balearn backend CI/CD
+
+on:
+  pull_request:
+    branches: [develop-2026]
+  push:
+    branches: [develop-2026]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: balearn-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci-only
+          MYSQL_DATABASE: balearn
+          MYSQL_USER: balearn
+          MYSQL_PASSWORD: ci-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysql -h 127.0.0.1 -ubalearn -pci-only -e 'SELECT 1'"
+          --health-interval=5s --health-timeout=5s --health-retries=24
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s --health-timeout=3s --health-retries=12
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: "false"
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+        ports:
+          - 9200:9200
+        options: >-
+          --health-cmd="curl -fsS http://localhost:9200/_cluster/health?wait_for_status=yellow"
+          --health-interval=5s --health-timeout=5s --health-retries=24
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Test Spring with isolated data services
+        env:
+          SPRING_PROFILES_ACTIVE: dev
+          DATABASE_URL: jdbc:mysql://127.0.0.1:3306/balearn?useSSL=false&allowPublicKeyRetrieval=true
+          DATABASE_USER: balearn
+          DATABASE_PASSWORD: ci-only
+          REDIS_HOST: 127.0.0.1
+          REDIS_PASSWORD: ""
+          ES_URL: http://127.0.0.1:9200
+          BACKEND_URL: http://127.0.0.1:8080
+          FRONTEND_URL: http://127.0.0.1:3000
+          MEDIA_STORAGE_PROVIDER: local
+        run: |
+          export JAVA_HOME="$JAVA_HOME_17_X64"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          export JWT_SECRET="$(openssl rand -base64 48)"
+          bash ./gradlew test --no-daemon
+      - name: Build production image
+        run: docker build -t "balearn-backend:$GITHUB_SHA" .
+
+      - name: Save verified image
+        if: github.event_name == 'push'
+        run: docker save "balearn-backend:$GITHUB_SHA" | gzip -1 > image.tar.gz
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: github.event_name == 'push'
+        with:
+          name: production-image
+          path: image.tar.gz
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
+
+  publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop-2026'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: production-image
+      - name: Publish tested image for the VM
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          tag="production-$GITHUB_SHA"
+          if gh release view "$tag" --json isDraft,assets --jq '.isDraft == false and any(.assets[]; .name == "image.tar.gz")' | grep -qx true; then
+            exit 0
+          fi
+          gh release create "$tag" image.tar.gz --target "$GITHUB_SHA" --latest=false \
+            --title "Balearn backend ${GITHUB_SHA:0:12}" --notes "Image verified by GitHub Actions for develop-2026."

@@ -5,6 +5,7 @@ import com.jipsa.balearn.domain.mission.MissionId
 import com.jipsa.balearn.domain.mission.MissionReader
 import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.team_user.TeamUserReader
+import com.jipsa.balearn.domain.team_user.TeamUserValidator
 import com.jipsa.balearn.domain.user.User
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,7 +16,8 @@ class MissionClearService(
     private val missionReader: MissionReader,
     private val missionClearDeleter: MissionClearDeleter,
     private val teamUserReader: TeamUserReader,
-    private val leaderboardReader: LeaderboardReader
+    private val leaderboardReader: LeaderboardReader,
+    private val teamUserValidator: TeamUserValidator
 ) {
     @Transactional
     fun appendMissionClear(teamId: TeamId, user: User, missionId: MissionId): MissionClear {
@@ -54,7 +56,8 @@ class MissionClearService(
     }
 
 
-    fun readLeaderboard(teamId: TeamId, topN: Int): List<LeaderboardResponse> {
+    fun readLeaderboard(teamId: TeamId, user: User, topN: Int): List<LeaderboardResponse> {
+        teamUserValidator.validTeamUser(teamId, user.id)
         return leaderboardReader.read(teamId, topN)
     }
 

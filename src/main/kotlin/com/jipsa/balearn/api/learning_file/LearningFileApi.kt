@@ -11,6 +11,12 @@ import com.jipsa.balearn.domain.learning_file.LearningFileService
 import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.user.User
 import org.springframework.data.domain.PageRequest
+import org.springframework.core.io.InputStreamResource
+import org.springframework.http.CacheControl
+import org.springframework.http.ContentDisposition
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
@@ -40,6 +46,19 @@ class LearningFileApi(
         @CurrentUser user: User
     ): ApiResponse<LearningFileResponse> {
         return ApiResponse.success(learningFileService.readLearningFile(LearningFileId(fileId), user))
+    }
+
+    @GetMapping("/{fileId}/download")
+    fun download(@PathVariable fileId: Long, @CurrentUser user: User): ResponseEntity<InputStreamResource> {
+        val file = learningFileService.openDownload(LearningFileId(fileId), user)
+        val name = file.name.replace(Regex("[\\p{Cntrl}/\\\\]"), "_").ifBlank { "download" }
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.noStore())
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .contentLength(file.size)
+            .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment().filename(name, Charsets.UTF_8).build().toString())
+            .header("X-Content-Type-Options", "nosniff")
+            .body(InputStreamResource(file.stream))
     }
 
     @PostMapping("/team/{teamId}")

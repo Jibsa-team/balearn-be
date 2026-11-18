@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService
 
 @Configuration
 @EnableWebSecurity
@@ -32,6 +33,7 @@ class SecurityConfig(
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        val oidcUserService = OidcUserService()
         return http
             .csrf { it.disable() }
             .httpBasic { it.disable() }
@@ -40,13 +42,23 @@ class SecurityConfig(
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it.requestMatchers(*loginUrls).permitAll()
+                    .requestMatchers(HttpMethod.GET, "/media/**").permitAll()
+                    .requestMatchers(HttpMethod.HEAD, "/media/**").permitAll()
                     .requestMatchers(*permitUrls).permitAll()
                     .requestMatchers(*swaggerUrls).permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest().authenticated()
             }
             .oauth2Login { oAuth2LoginConfigurer ->
-                oAuth2LoginConfigurer.userInfoEndpoint { it.userService(customOAuth2UserService) }
+                oAuth2LoginConfigurer.userInfoEndpoint {
+                    it.userService(customOAuth2UserService)
+                        .oidcUserService { request ->
+                            val user = oidcUserService.loadUser(request)
+                            if (request.clientRegistration.registrationId == "oidc") {
+                                customOAuth2UserService.registerOidcUser(user)
+                            } else user
+                        }
+                }
                     .successHandler(customOAuth2LoginSuccessHandler)
                     .failureHandler(customOAuth2LoginFailureHandler)
             }

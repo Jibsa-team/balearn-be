@@ -22,7 +22,7 @@ class LeaderboardApi(
         @PathVariable teamId: Long,
         @RequestParam(required = false) top: Int?
     ): ApiResponse<List<LeaderboardResponse>> {
-        return ApiResponse.success(missionClearService.readLeaderboard(TeamId(teamId), top ?: 5))
+        return ApiResponse.success(missionClearService.readLeaderboard(TeamId(teamId), user, top ?: 5))
     }
 
     @GetMapping("/{teamId}/me")

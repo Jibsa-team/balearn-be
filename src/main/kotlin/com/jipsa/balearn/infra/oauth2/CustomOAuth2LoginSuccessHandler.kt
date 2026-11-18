@@ -1,6 +1,5 @@
 package com.jipsa.balearn.infra.oauth2
 
-import com.jipsa.balearn.common.util.CookieUtil
 import com.jipsa.balearn.domain.user.TokenAppender
 import com.jipsa.balearn.domain.user.UserReader
 import com.jipsa.balearn.infra.jwt.JwtGenerator
@@ -8,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.Authentication
+import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
 
@@ -29,8 +29,12 @@ class CustomOAuth2LoginSuccessHandler(
             return
         }
 
-        val customOAuth2User = authentication.principal as CustomOAuth2UserDetail
-        val user = userReader.readByEmail(customOAuth2User.getEmail())
+        val email = when (val principal = authentication.principal) {
+            is CustomOAuth2UserDetail -> principal.getEmail()
+            is OidcUser -> principal.email
+            else -> error("Unsupported OAuth principal")
+        }
+        val user = userReader.readByEmail(email)
 
         val loginToken = jwtGenerator.generateLoginToken(user)
 
@@ -38,7 +42,7 @@ class CustomOAuth2LoginSuccessHandler(
 
         response.sendRedirect(
             "${frontendUrl}/oauth/${
-                customOAuth2User.getProvider().toString().lowercase()
+                user.userProvider.provider.name.lowercase()
             }/callback"
         )
     }

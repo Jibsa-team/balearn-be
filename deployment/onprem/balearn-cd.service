@@ -1,0 +1,11 @@
+[Unit]
+Description=Deploy verified Balearn images
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/balearn/cd/deploy-images.py
+TimeoutStartSec=15min
+UMask=0077

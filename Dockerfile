@@ -1,5 +1,5 @@
 # Build stage
-FROM openjdk:17-jdk-slim AS builder
+FROM eclipse-temurin:17-jdk-jammy AS builder
 WORKDIR /build
 
 # 그래들 래퍼 및 소스 복사
@@ -10,11 +10,7 @@ COPY settings.gradle.kts .
 COPY src src
 
 # gradlew 실행 권한 부여 및 의존성 설치
-RUN chmod +x ./gradlew
-RUN ./gradlew dependencies --no-daemon
-
-# 애플리케이션 빌드
-RUN ./gradlew bootJar --no-daemon
+RUN java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain bootJar --no-daemon
 
 # Runtime stage
 FROM eclipse-temurin:17-jre
@@ -37,6 +33,7 @@ COPY --from=builder /build/build/libs/*.jar app.jar
 
 # 권한 설정
 RUN chown -R spring:spring /app
+RUN install -d -o spring -g spring /data/media
 USER spring
 
 # 컨테이너 헬스체크

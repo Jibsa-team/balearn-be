@@ -1,14 +1,14 @@
 package com.jipsa.balearn.domain.team_user
 
 import com.jipsa.balearn.common.dto.File
-import com.jipsa.balearn.infra.gcs.GcsFileUploader
+import com.jipsa.balearn.domain.storage.MediaUploader
 import org.springframework.stereotype.Component
 
 @Component
 class TeamUserImageAppender(
-    private val gcsFileUploader: GcsFileUploader
+    private val mediaUploader: MediaUploader
 ) {
     fun append(image: File?): String? {
-        return image?.let { gcsFileUploader.uploadImageFile(it, "teamUserProfile") }
+        return image?.let { mediaUploader.uploadImageFile(it, "teamUserProfile") }
     }
 }

@@ -63,7 +63,7 @@ class TeamUser(
             return TeamUser(
                 _profile = TeamUserProfile(
                     nickname = "탈퇴한 사용자",
-                    profileImageUrl = "https://cdn.balearn.o-r.kr/profile/default-user.jpg",
+                    profileImageUrl = "/Avatar.png",
                     role = TeamUserRole.EX_MEMBER
                 ),
                 team = team,

@@ -9,15 +9,15 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
+            client-id: ${GOOGLE_CLIENT_ID:local-placeholder}
+            client-secret: ${GOOGLE_CLIENT_SECRET:local-placeholder}
             redirect-uri: "${BACKEND_URL}/login/oauth2/code/google"
             scope:
               - email
               - profile
           github:
-            client-id: ${GB_CLIENT_ID}
-            client-secret: ${GB_CLIENT_SECRET}
+            client-id: ${GB_CLIENT_ID:local-placeholder}
+            client-secret: ${GB_CLIENT_SECRET:local-placeholder}
             redirect-uri: "${BACKEND_URL}/login/oauth2/code/github"
             scope:
               - read:user
@@ -25,8 +25,8 @@ spring:
               - user:profile
               - user:avatar
           kakao:
-            client-id: ${KAKAO_CLIENT_ID}
-            client-secret: ${KAKAO_CLIENT_SECRET}
+            client-id: ${KAKAO_CLIENT_ID:local-placeholder}
+            client-secret: ${KAKAO_CLIENT_SECRET:local-placeholder}
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
             redirect-uri: "${BACKEND_URL}/login/oauth2/code/kakao"
@@ -44,12 +44,14 @@ spring:
 
   cloud:
     gcp:
+      core:
+        enabled: false
       storage:
-        url: https://${GCP_CDN_DOMAIN}/
+        url: ${GCS_PUBLIC_URL:https://${GCP_CDN_DOMAIN:}/}
         credentials:
-          encoded-key: ${GCS_KEY}
-        project-id: ${GCP_PROJECT_ID}
-        bucket: ${BUCKET_NAME}
+          encoded-key: ${GCS_KEY:}
+        project-id: ${GCP_PROJECT_ID:}
+        bucket: ${BUCKET_NAME:}
 
   servlet:
     multipart:
@@ -65,4 +67,17 @@ jwt:
 springdoc:
   swagger-ui:
     path: /
+
+balearn:
+  storage:
+    provider: ${MEDIA_STORAGE_PROVIDER:local}
+    gcs-learning-bucket: ${GCS_LEARNING_BUCKET:}
+    local-directory: ${MEDIA_LOCAL_DIRECTORY:./data/media}
+    public-url: ${MEDIA_PUBLIC_URL:${BACKEND_URL:http://localhost:8080}/media}
+  web:
+    allowed-origins: ${WEB_ALLOWED_ORIGINS:${frontend.url},http://localhost:3000,http://localhost:5173}
+
+frontend:
+  url: ${FRONTEND_URL:http://localhost:3000}
+  domain: ${FRONTEND_DOMAIN:}
 

@@ -8,5 +8,5 @@ value class TeamId(@JsonValue val value: Long = 0)
 data class TeamInfo(
     val name: String,
     val description: String,
-    val teamImageUrl: String = "https://cdn.balearn.o-r.kr/profile/default-team.png"
+    val teamImageUrl: String = "/icons/logo_bg.png"
 )

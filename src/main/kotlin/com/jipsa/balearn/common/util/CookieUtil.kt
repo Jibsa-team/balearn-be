@@ -41,7 +41,7 @@ class CookieUtil(
             secure = isSecure()
             if (secure) {
                 setAttribute("SameSite", "None")
-                domain = frontendDomain
+                if (frontendDomain.isNotBlank()) domain = frontendDomain
             }
         }
         response.addCookie(cookie)
@@ -71,7 +71,7 @@ class CookieUtil(
             secure = isSecure()
             if (secure) {
                 setAttribute("SameSite", "None")
-                domain = frontendDomain
+                if (frontendDomain.isNotBlank()) domain = frontendDomain
             }
         }
         response.addCookie(cookie)

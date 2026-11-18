@@ -1,50 +1,28 @@
-package com.jipsa.balearn.infra.gcs
+package com.jipsa.balearn.domain.storage
 
-import com.google.cloud.storage.BlobInfo
-import com.google.cloud.storage.Storage
 import com.jipsa.balearn.common.dto.File
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
-class GcsFileUploader(
-    private val storage: Storage,
-    @Value("\${spring.cloud.gcp.storage.bucket}")
-    private val bucketName: String,
-    @Value("\${spring.cloud.gcp.storage.url}")
-    private val storagePath: String
-) {
+class MediaUploader(private val storage: MediaStorage) {
     fun uploadImageFile(file: File, directory: String = "profile"): String {
         validateProfileImage(file)
 
-        val fileName = generateFileName(file.originalFilename)
-        val blobInfo = BlobInfo.newBuilder(bucketName, "$directory/$fileName")
-            .setContentType(file.contentType)
-            .build()
-
-        storage.create(blobInfo, file.bytes)
-
-        return "$storagePath$directory/$fileName"
+        val extension = imageExtensions.getValue(file.contentType)
+        return storage.put("$directory/${UUID.randomUUID()}.$extension", file)
     }
 
     fun uploadLearningMaterial(file: File, directory: String = "learn"): String {
         validateLearningMaterial(file)
 
-        val fileName = generateFileName(file.originalFilename)
-        val blobInfo = BlobInfo.newBuilder(bucketName, "$directory/$fileName")
-            .setContentType(file.contentType)
-            .build()
-
-        storage.create(blobInfo, file.bytes)
-
-        return "$storagePath$directory/$fileName"
+        val extension = file.originalFilename?.substringAfterLast('.', "")
+            ?.takeIf { it.matches(Regex("[a-zA-Z0-9]{1,12}")) }
+        val name = UUID.randomUUID().toString() + (extension?.let { ".$it" } ?: "")
+        return storage.put("$directory/$name", file)
     }
 
-    private fun generateFileName(originalFileName: String?): String {
-        val extension = originalFileName?.substringAfterLast('.', "")
-        return "${UUID.randomUUID()}.$extension"
-    }
+    private val imageExtensions = mapOf("image/jpeg" to "jpg", "image/png" to "png", "image/gif" to "gif")
 
     private fun validateProfileImage(file: File) {
         // 파일 크기 검증 (예: 5MB 제한)
@@ -53,8 +31,7 @@ class GcsFileUploader(
         }
 
         // 파일 형식 검증
-        val allowedContentTypes = listOf("image/jpeg", "image/png", "image/gif")
-        if (!allowedContentTypes.contains(file.contentType)) {
+        if (file.contentType !in imageExtensions) {
             throw IllegalArgumentException("지원하지 않는 이미지 형식입니다. (지원 형식: JPEG, PNG, GIF)")
         }
     }

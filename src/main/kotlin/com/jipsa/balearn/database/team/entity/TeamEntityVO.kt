@@ -11,12 +11,14 @@ data class TeamInfoVO(
     @Column(nullable = false)
     val description: String,
     @Column(nullable = false)
-    val teamImageUrl: String = "https://cdn.balearn.o-r.kr/profile/default-team.png"
+    val teamImageUrl: String = "/icons/logo_bg.png"
 ) {
     fun toDomain() = TeamInfo(
         name = name,
         description = description,
-        teamImageUrl = teamImageUrl
+        teamImageUrl = if (teamImageUrl == "https://cdn.balearn.o-r.kr/profile/default-team.png") {
+            "/icons/logo_bg.png"
+        } else teamImageUrl
     )
 
     companion object {

@@ -1,0 +1,15 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          oidc:
+            client-id: ${OIDC_CLIENT_ID}
+            client-secret: ${OIDC_CLIENT_SECRET}
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_basic
+            redirect-uri: "${BACKEND_URL}/login/oauth2/code/oidc"
+            scope: [openid, profile, email]
+        provider:
+          oidc:
+            issuer-uri: ${OIDC_ISSUER_URL}

@@ -1,6 +1,7 @@
 package com.jipsa.balearn.infra.websocket.config
 
 import org.springframework.context.annotation.Configuration
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.messaging.simp.config.ChannelRegistration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
@@ -10,7 +11,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 class WebSocketConfig(
-    private val jwtInterceptor: JwtInterceptor
+    private val jwtInterceptor: JwtInterceptor,
+    @Value("\${balearn.web.allowed-origins}") private val allowedOrigins: Array<String>
 ) : WebSocketMessageBrokerConfigurer {
 
     override fun configureClientInboundChannel(registration: ChannelRegistration) {
@@ -25,17 +27,7 @@ class WebSocketConfig(
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
         registry
             .addEndpoint("/ws") // 엔드포인트: /ws
-            .setAllowedOriginPatterns("*")
-            .setAllowedOrigins(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://dev.balearn.o-r.kr:3000",
-                "https://balearn.o-r.kr",
-                "https://be.balearn.o-r.kr",
-                "https://*.balearn.o-r.kr",
-                "https://balearn-fe.vercel.app",
-                "https://*.balearn-fe.vercel.app"
-            )
+            .setAllowedOrigins(*allowedOrigins)
             .withSockJS()
     }
 }

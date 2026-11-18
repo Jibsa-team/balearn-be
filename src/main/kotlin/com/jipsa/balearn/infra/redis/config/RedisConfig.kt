@@ -9,6 +9,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.connection.RedisPassword
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.listener.PatternTopic
 import org.springframework.data.redis.listener.RedisMessageListenerContainer
@@ -25,14 +26,23 @@ class RedisConfig {
     @Value("\${spring.data.redis.password}")
     private lateinit var password: String
 
+    @Value("\${spring.data.redis.username:}")
+    private lateinit var username: String
+
+    @Value("\${spring.data.redis.ssl.enabled:false}")
+    private var ssl = false
+
     @Bean
     fun redisConnectionFactory(): LettuceConnectionFactory {
         val redisConfig = RedisStandaloneConfiguration()
         redisConfig.hostName = host
         redisConfig.port = port
         redisConfig.password = RedisPassword.of(password)
+        if (username.isNotBlank()) redisConfig.username = username
 
-        return LettuceConnectionFactory(redisConfig)
+        val clientConfig = LettuceClientConfiguration.builder()
+        if (ssl) clientConfig.useSsl()
+        return LettuceConnectionFactory(redisConfig, clientConfig.build())
     }
 
     @Bean

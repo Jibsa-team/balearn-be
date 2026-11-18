@@ -43,13 +43,15 @@ data class UserProfileVO(
     val phoneNumber: String?,
 
     @Column(nullable = false)
-    val profileImageUrl: String = "https://cdn.balearn.o-r.kr/profile/default-user.jpg",
+    val profileImageUrl: String = UserProfile.DEFAULT_IMAGE_URL,
 ) {
     fun toDomain() = UserProfile(
         name = name,
         email = email,
         phoneNumber = phoneNumber,
-        profileImageUrl = profileImageUrl
+        profileImageUrl = if (profileImageUrl == "https://cdn.balearn.o-r.kr/profile/default-user.jpg") {
+            UserProfile.DEFAULT_IMAGE_URL
+        } else profileImageUrl
     )
 
     companion object {

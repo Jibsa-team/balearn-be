@@ -2,6 +2,8 @@ package com.jipsa.balearn.domain.learning_file
 
 import com.jipsa.balearn.api.learning_file.dto.LearningFileResponse
 import com.jipsa.balearn.common.dto.File
+import com.jipsa.balearn.domain.notice.exception.CustomLearningFileException
+import com.jipsa.balearn.domain.storage.LearningFileObjectStore
 import com.jipsa.balearn.domain.team.TeamId
 import com.jipsa.balearn.domain.team.TeamReader
 import com.jipsa.balearn.domain.team_user.TeamUser
@@ -11,6 +13,7 @@ import com.jipsa.balearn.domain.user.User
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.InputStream
 
 @Service
 class LearningFileService(
@@ -20,8 +23,19 @@ class LearningFileService(
     private val teamReader: TeamReader,
     private val learningFileReader: LearningFileReader,
     private val teamUserValidator: TeamUserValidator,
-    private val learningFileDeleter: LearningFileDeleter
+    private val learningFileDeleter: LearningFileDeleter,
+    private val objectStores: List<LearningFileObjectStore>
 ) {
+    data class Download(val name: String, val size: Long, val stream: InputStream)
+
+    fun openDownload(id: LearningFileId, user: User): Download {
+        val file = learningFileReader.read(id)
+        teamUserValidator.validTeamUser(file.team.id, user.id)
+        val info = file.learningFileInfo
+        val stream = objectStores.firstNotNullOfOrNull { it.openLearningFile(info.fileUrl) }
+            ?: throw CustomLearningFileException.LearningFileNotFoundException
+        return Download(info.name, info.size, stream)
+    }
     @Transactional
     fun appendLearningFile(name: String, file: File, user: User, teamId: TeamId): LearningFileResponse {
         val team = teamReader.read(teamId)
@@ -45,7 +59,7 @@ class LearningFileService(
         )
     }
 
-    @Transactional
+    @Transactional(rollbackFor = [Exception::class])
     fun deleteLearningFile(learningFileId: LearningFileId, user: User) {
         val learningFile = learningFileReader.read(learningFileId)
 

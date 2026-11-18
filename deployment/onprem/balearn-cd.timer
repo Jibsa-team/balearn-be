@@ -1,0 +1,9 @@
+[Unit]
+Description=Check for verified Balearn images
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=5min
+
+[Install]
+WantedBy=timers.target

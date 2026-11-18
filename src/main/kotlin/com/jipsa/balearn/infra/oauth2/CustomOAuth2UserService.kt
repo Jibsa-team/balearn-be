@@ -6,6 +6,9 @@ import com.jipsa.balearn.infra.oauth2.exception.CustomOAuth2Exception
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
 import org.springframework.security.oauth2.core.user.OAuth2User
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException
+import org.springframework.security.oauth2.core.oidc.user.OidcUser
+import java.security.MessageDigest
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -81,6 +84,30 @@ class CustomOAuth2UserService(
         } catch (e: CustomUserException.UserNotFoundException) {
             createNewUser(userInfo)
         }
+    }
+
+    fun registerOidcUser(user: OidcUser): OidcUser {
+        val email = user.email?.takeIf { it.isNotBlank() && user.emailVerified == true }
+            ?: throw OAuth2AuthenticationException("verified_email_required")
+        val identity = "${user.issuer}\u0000${user.subject}"
+        val providerId = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(identity.toByteArray()))
+        val attributes = OAuth2Attributes(
+            name = user.fullName ?: user.preferredUsername ?: email,
+            email = email,
+            provider = AuthProvider.OIDC,
+            snsId = providerId,
+            profileImageUrl = UserProfile.DEFAULT_IMAGE_URL,
+            attributes = user.attributes
+        )
+        try {
+            val existing = userReader.readByEmail(email)
+            if (existing.userProvider != UserProvider(AuthProvider.OIDC, providerId)) {
+                throw OAuth2AuthenticationException("account_already_registered")
+            }
+        } catch (e: CustomUserException.UserNotFoundException) {
+            createNewUser(attributes)
+        }
+        return user
     }
 
     private fun createNewUser(attributes: OAuth2Attributes) {

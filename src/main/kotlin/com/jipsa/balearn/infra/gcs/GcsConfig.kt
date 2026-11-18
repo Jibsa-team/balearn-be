@@ -4,6 +4,7 @@ import com.google.auth.oauth2.GoogleCredentials
 import com.google.cloud.storage.Storage
 import com.google.cloud.storage.StorageOptions
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.io.ByteArrayInputStream
@@ -11,6 +12,7 @@ import java.io.IOException
 import java.util.*
 
 @Configuration
+@ConditionalOnProperty(name = ["balearn.storage.provider"], havingValue = "gcs")
 class GcsConfig(
     @Value("\${spring.cloud.gcp.storage.credentials.encoded-key}")
     private val gcpKey: String,
@@ -21,12 +23,10 @@ class GcsConfig(
     @Bean
     @Throws(IOException::class)
     fun storage(): Storage {
-        val credentials: GoogleCredentials = getDecodedCredentials(gcpKey)
-        return StorageOptions.newBuilder()
-            .setProjectId(projectId)
-            .setCredentials(credentials)
-            .build()
-            .service
+        val options = StorageOptions.newBuilder()
+        if (projectId.isNotBlank()) options.setProjectId(projectId)
+        if (gcpKey.isNotBlank()) options.setCredentials(getDecodedCredentials(gcpKey))
+        return options.build().service
     }
 
     @Throws(IOException::class)

@@ -27,6 +27,7 @@ class LearningFileRepositoryAdaptor(
 
     override fun delete(learningFile: LearningFile) {
         learningFileJpaRepository.delete(LearningFileEntity.from(learningFile))
+        learningFileJpaRepository.flush()
     }
 
     override fun deleteById(learningFIleId: LearningFileId) {

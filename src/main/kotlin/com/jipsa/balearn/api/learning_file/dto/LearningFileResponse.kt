@@ -21,7 +21,7 @@ data class LearningFileResponse(
             return LearningFileResponse(
                 id = learningFile.id.value,
                 name = learningFile.learningFileInfo.name,
-                fileUrl = learningFile.learningFileInfo.fileUrl,
+                fileUrl = "/api/file/${learningFile.id.value}/download",
                 type = learningFile.learningFileInfo.type,
                 size = learningFile.learningFileInfo.size,
                 createdAt = learningFile.createdAt,
