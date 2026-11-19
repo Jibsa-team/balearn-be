@@ -1,0 +1,1 @@
+/srv/balearn/media 10.77.20.2(rw,sync,no_subtree_check,root_squash) 10.77.20.3(rw,sync,no_subtree_check,root_squash)

@@ -58,7 +58,7 @@ class ChatRepositoryAdaptor(
                 chatDocuments.map { chat ->
                     BulkOperation.of { op ->
                         op.index { idx ->
-                            idx.index("chat")
+                            idx.index("chat").id(chat.id)
                                 .document(chat)
                         }
                     }

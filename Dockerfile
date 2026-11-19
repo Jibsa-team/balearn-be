@@ -26,7 +26,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # 보안을 위한 비root 유저 생성
-RUN groupadd -r spring && useradd -r -g spring spring
+RUN groupadd -r -g 999 spring && useradd -r -u 999 -g spring spring
 
 # 빌드된 JAR 파일 복사
 COPY --from=builder /build/build/libs/*.jar app.jar

@@ -1,5 +1,7 @@
 # 새 VMware VM에서 Balearn 운영
 
+앱 VM 두 대의 동시 운영과 롤링 배포 절차는 [다중 VM 운영 가이드](../deployment/onprem/cluster/README.md)에 정리한다.
+
 이 배포는 VMware VM `balearn-onprem`과 TCP `9443`을 사용한다. VM은 Ubuntu Server 24.04 LTS, 2 vCPU, RAM 4GB, 60GB 가상 디스크로 구성한다. 기존 VMware 서비스의 포워딩과 VM 설정은 건드리지 않는다.
 
 | 항목 | 구성 |

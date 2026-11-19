@@ -1,7 +1,6 @@
 package com.jipsa.balearn.domain.chat
 
 import com.jipsa.balearn.domain.team.TeamId
-import com.jipsa.balearn.domain.team.TeamReader
 import com.jipsa.balearn.domain.team_user.TeamUserReader
 import com.jipsa.balearn.domain.team_user.TeamUserValidator
 import com.jipsa.balearn.domain.user.User
@@ -21,8 +20,8 @@ class ChatService(
     private val teamUserValidator: TeamUserValidator,
     private val chatAppender: ChatAppender,
     private val chatReader: ChatReader,
-    private val teamReader: TeamReader,
-    private val chatDeleter: ChatDeleter
+    private val chatDeleter: ChatDeleter,
+    private val chatMaintenance: ChatMaintenance
 ) {
     @Transactional
     fun sendChat(teamId: TeamId, message: String, user: User) {
@@ -56,30 +55,20 @@ class ChatService(
         return chatList
     }
 
-    @Transactional
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedDelay = 60_000)
     fun appendChatInElasticsearch() {
-        chatAppender.appendInElasticsearchBatch(chatReader.readInRedisBatch())
-        chatDeleter.deleteChatInRedisBatch()
+        chatMaintenance.withLock {
+            repeat(20) {
+                val batch = chatReader.readInRedisBatch()
+                if (batch.isEmpty()) return@withLock
+                chatAppender.appendInElasticsearchBatch(batch)
+                chatDeleter.acknowledgeChatBatch(batch.size.toLong())
+            }
+        }
     }
 
-//    @Transactional
-//    @Scheduled(cron = "0 0 4 */3 * ?")
-//    fun syncChat() {
-//        val teamList = teamReader.readAll()
-//
-//        teamList.forEach { team ->
-//            val chatList = chatReader.readInElasticsearch(teamId = team.id, pageable = Pageable.ofSize(100))
-//            chatList.isNotEmpty().let {
-//                val oldChatList = chatReader.readInRedis(team.id, null, Pageable.ofSize(100))
-//
-//                chatAppender.appendInRedisBatch(team.id, chatList)
-//            }
-//        }
-//    }
-
-    @Scheduled(fixedRate = 360000)
+    @Scheduled(fixedDelay = 360_000)
     fun decreaseChatInRedis() {
-        chatDeleter.decreaseChatInRedis()
+        chatMaintenance.withLock { chatDeleter.decreaseChatInRedis() }
     }
 }

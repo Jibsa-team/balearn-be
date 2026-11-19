@@ -8,8 +8,8 @@ class ChatDeleter(
     private val chatRepository: ChatRepository,
     private val redisRepository: RedisRepository
 ) {
-    fun deleteChatInRedisBatch() {
-        redisRepository.delete(redisRepository.generateChatBatchKey())
+    fun acknowledgeChatBatch(count: Long) {
+        redisRepository.acknowledgeChatBatch(count)
     }
 
     fun decreaseChatInRedis() {
