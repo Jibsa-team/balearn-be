@@ -28,7 +28,7 @@ def status():
             result = run("docker", "inspect", "--format", "{{.Config.Image}}",
                          f"balearn-node-{component}-1", capture_output=True, text=True)
         except subprocess.CalledProcessError as error:
-            if "No such object" not in error.stderr:
+            if not any(message in error.stderr.lower() for message in ("no such object", "no such container")):
                 raise
             versions[component] = None
             continue
