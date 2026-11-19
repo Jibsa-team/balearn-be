@@ -24,6 +24,13 @@ class RedisRepository(
     private val operationSet = redisTemplate.opsForSet()
     private val operationZSet = redisTemplate.opsForZSet()
     private val operationList = redisTemplate.opsForList()
+    private val appendChat = DefaultRedisScript(
+        """
+        redis.call('ZADD', KEYS[1], ARGV[1], ARGV[2])
+        return redis.call('LPUSH', KEYS[2], ARGV[2])
+        """.trimIndent(),
+        Long::class.javaObjectType
+    )
     private val claimChatBatch = DefaultRedisScript(
         """
         if redis.call('EXISTS', KEYS[2]) == 0 and redis.call('EXISTS', KEYS[1]) == 1 then
@@ -109,11 +116,6 @@ class RedisRepository(
         return operationZSet.reverseRangeWithScores(key, 0, (topN - 1).toLong())
     }
 
-    fun addChatZSetScore(key: String, chat: Chat, score: Double) {
-        val jsonChat = objectMapper.writeValueAsString(chat)
-        operationZSet.add(key, jsonChat, score)
-    }
-
     fun addChatZSetScores(key: String, valuesWithScores: Map<Chat, Double>) {
         val tupleSet = valuesWithScores.map { (value, score) ->
             ZSetOperations.TypedTuple.of(objectMapper.writeValueAsString(value), score)
@@ -144,9 +146,10 @@ class RedisRepository(
         } ?: return emptySet()
     }
 
-    fun addChatList(key: String, chat: Chat) {
+    fun enqueueChat(chat: Chat, score: Double) {
         val jsonChat = objectMapper.writeValueAsString(chat)
-        operationList.leftPush(key, jsonChat)
+        redisTemplate.execute(appendChat, listOf(generateChatKey(chat.teamId.value), generateChatBatchKey()),
+            score.toString(), jsonChat)
     }
 
     fun getChatList(key: String, start: Long = 0, end: Long = -1): List<Chat> {
