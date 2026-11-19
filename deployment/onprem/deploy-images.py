@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import re
+from html.parser import HTMLParser
 import shutil
 import socket
 import subprocess
@@ -38,7 +39,11 @@ def github_json(path):
 def latest_image(repo):
     repository = f"Jibsa-team/{repo}"
     prefix = f"repos/{repository}"
-    sha = github_json(f"{prefix}/branches/{BRANCH}")["commit"]["sha"]
+    head = subprocess.check_output(
+        ["git", "ls-remote", "--exit-code", f"https://github.com/{repository}.git",
+         f"refs/heads/{BRANCH}"], text=True, timeout=20
+    )
+    sha = head.split()[0]
     if not re.fullmatch(SHA, sha):
         raise ValueError("Invalid GitHub commit SHA")
     tag = f"production-{sha}"
@@ -47,6 +52,8 @@ def latest_image(repo):
     except HTTPError as error:
         if error.code == 404:
             return sha, None
+        if error.code == 403 and error.headers.get("X-RateLimit-Remaining") == "0":
+            return sha, public_release_asset(repository, tag)
         raise
     if release["tag_name"] != tag or release["draft"]:
         raise ValueError("Unexpected release metadata")
@@ -61,6 +68,37 @@ def latest_image(repo):
         ):
             return sha, asset
     raise ValueError(f"{repo}: release asset or digest is missing")
+
+
+def public_release_asset(repository, tag):
+    base = f"https://github.com/{repository}/releases"
+    path = f"/{repository}/releases/download/{tag}/{ASSET}"
+
+    class AssetMetadata(HTMLParser):
+        linked = False
+        digests = []
+
+        def handle_starttag(self, element, attrs):
+            fields = dict(attrs)
+            if element == "a" and fields.get("href") == path:
+                self.linked = True
+            if element == "clipboard-copy" and fields.get("aria-label") == f"Copy to clipboard digest for {ASSET}":
+                digest = fields.get("value", "")
+                if re.fullmatch(r"sha256:[a-f0-9]{64}", digest):
+                    self.digests.append(digest)
+
+    page = AssetMetadata()
+    try:
+        with urlopen(Request(f"{base}/expanded_assets/{tag}",
+                             headers={"User-Agent": "balearn-onprem-cd"}), timeout=15) as response:
+            page.feed(response.read(1024**2).decode("utf-8"))
+    except HTTPError as error:
+        if error.code == 404:
+            return None
+        raise
+    if not page.linked or len(page.digests) != 1:
+        raise ValueError("GitHub did not publish a unique release asset checksum")
+    return {"browser_download_url": f"https://github.com{path}", "digest": page.digests[0]}
 
 
 def docker(*args):
@@ -119,13 +157,14 @@ def load_image(asset, image):
         request = Request(asset["browser_download_url"], headers={"User-Agent": "balearn-onprem-cd"})
         deadline = time.monotonic() + 120
         with urlopen(request, timeout=20) as response:
+            expected_size = asset.get("size")
             while chunk := response.read(1024 * 1024):
                 received += len(chunk)
-                if received > asset["size"] or time.monotonic() > deadline:
+                if received > (expected_size or 1024**3) or time.monotonic() > deadline:
                     raise ValueError("Unexpected release download size or duration")
                 digest.update(chunk)
                 archive.write(chunk)
-        if received != asset["size"] or f"sha256:{digest.hexdigest()}" != asset["digest"]:
+        if (expected_size is not None and received != expected_size) or f"sha256:{digest.hexdigest()}" != asset["digest"]:
             raise ValueError("Release image checksum mismatch")
         archive.seek(0)
         subprocess.run(["docker", "load"], stdin=archive, timeout=120, check=True)
