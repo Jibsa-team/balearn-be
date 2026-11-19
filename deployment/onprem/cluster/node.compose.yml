@@ -4,11 +4,14 @@ services:
     image: ${BALEARN_BACKEND_IMAGE:?}
     restart: unless-stopped
     mem_limit: 704m
+    stop_grace_period: 75s
     ports:
       - "${PRIVATE_IP:?}:8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: dev,cluster
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SERVER_SHUTDOWN: graceful
+      SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE: 60s
       JAVA_TOOL_OPTIONS: "-Xms96m -Xmx480m"
       BACKEND_URL: https://hmwg.balearn.o-r.kr:9443
       FRONTEND_URL: https://hmwg.balearn.o-r.kr:9443
@@ -34,5 +37,6 @@ services:
     image: ${BALEARN_FRONTEND_IMAGE:?}
     restart: unless-stopped
     mem_limit: 384m
+    stop_grace_period: 60s
     ports:
       - "${PRIVATE_IP:?}:3000:3000"
