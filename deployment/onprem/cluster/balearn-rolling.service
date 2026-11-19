@@ -1,0 +1,12 @@
+[Unit]
+Description=Roll out verified Balearn app images
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/opt/balearn/cluster/edge-address.env
+ExecStart=/usr/bin/python3 /opt/balearn/cluster/rolling-cd.py
+TimeoutStartSec=20min
+UMask=0077

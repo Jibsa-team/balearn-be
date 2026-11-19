@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.ScanOptions
 import org.springframework.data.redis.core.ZSetOperations
+import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.stereotype.Repository
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -23,6 +24,22 @@ class RedisRepository(
     private val operationSet = redisTemplate.opsForSet()
     private val operationZSet = redisTemplate.opsForZSet()
     private val operationList = redisTemplate.opsForList()
+    private val appendChat = DefaultRedisScript(
+        """
+        redis.call('ZADD', KEYS[1], ARGV[1], ARGV[2])
+        return redis.call('LPUSH', KEYS[2], ARGV[2])
+        """.trimIndent(),
+        Long::class.javaObjectType
+    )
+    private val claimChatBatch = DefaultRedisScript(
+        """
+        if redis.call('EXISTS', KEYS[2]) == 0 and redis.call('EXISTS', KEYS[1]) == 1 then
+            redis.call('RENAME', KEYS[1], KEYS[2])
+        end
+        return 1
+        """.trimIndent(),
+        Long::class.javaObjectType
+    )
 
     companion object {
         private const val REFRESH_TOKEN_KEY_PREFIX = "refresh_token:"
@@ -99,11 +116,6 @@ class RedisRepository(
         return operationZSet.reverseRangeWithScores(key, 0, (topN - 1).toLong())
     }
 
-    fun addChatZSetScore(key: String, chat: Chat, score: Double) {
-        val jsonChat = objectMapper.writeValueAsString(chat)
-        operationZSet.add(key, jsonChat, score)
-    }
-
     fun addChatZSetScores(key: String, valuesWithScores: Map<Chat, Double>) {
         val tupleSet = valuesWithScores.map { (value, score) ->
             ZSetOperations.TypedTuple.of(objectMapper.writeValueAsString(value), score)
@@ -134,9 +146,10 @@ class RedisRepository(
         } ?: return emptySet()
     }
 
-    fun addChatList(key: String, chat: Chat) {
+    fun enqueueChat(chat: Chat, score: Double) {
         val jsonChat = objectMapper.writeValueAsString(chat)
-        operationList.leftPush(key, jsonChat)
+        redisTemplate.execute(appendChat, listOf(generateChatKey(chat.teamId.value), generateChatBatchKey()),
+            score.toString(), jsonChat)
     }
 
     fun getChatList(key: String, start: Long = 0, end: Long = -1): List<Chat> {
@@ -145,6 +158,17 @@ class RedisRepository(
 
     fun getZSetSize(key: String): Long {
         return operationZSet.size(key) ?: 0
+    }
+
+    fun readPendingChatBatch(limit: Long): List<Chat> {
+        val incoming = generateChatBatchKey()
+        val processing = "$incoming:processing"
+        redisTemplate.execute(claimChatBatch, listOf(incoming, processing))
+        return getChatList(processing, end = limit - 1)
+    }
+
+    fun acknowledgeChatBatch(count: Long) {
+        operationList.trim("${generateChatBatchKey()}:processing", count, -1)
     }
 
     fun removeRangeZSet(key: String, start: Long, end: Long) {

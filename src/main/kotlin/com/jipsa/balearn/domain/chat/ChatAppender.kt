@@ -16,10 +16,7 @@ class ChatAppender(
     }
 
     fun appendInRedis(chat: Chat) {
-        val chatKey = redisRepository.generateChatKey(chat.teamId.value)
-        val newChatKey = redisRepository.generateChatBatchKey()
-        redisRepository.addChatZSetScore(chatKey, chat, chat.createdAt!!.toEpochMillis())
-        redisRepository.addChatList(newChatKey, chat)
+        redisRepository.enqueueChat(chat, chat.createdAt!!.toEpochMillis())
     }
 
     fun appendInRedisBatch(teamId: TeamId, chatList: List<Chat>) {

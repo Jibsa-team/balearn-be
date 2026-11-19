@@ -1,0 +1,59 @@
+name: balearn-infra
+services:
+  mysql:
+    image: mysql:8.0@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b
+    restart: unless-stopped
+    mem_limit: 512m
+    environment:
+      MYSQL_DATABASE: ${DATABASE_NAME:-balearn}
+      MYSQL_USER: ${DATABASE_USER:-balearn}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD:?}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?}
+    ports:
+      - "${PRIVATE_IP:?}:3306:3306"
+    volumes:
+      - mysql:/var/lib/mysql
+  redis:
+    image: redis:7-alpine@sha256:7f7d30b7fdd09467bac58198a1f166dd69789d348d4fe859cccb20e0cf287fbe
+    restart: unless-stopped
+    mem_limit: 192m
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?}"]
+    ports:
+      - "${PRIVATE_IP:?}:6379:6379"
+    volumes:
+      - redis:/data
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2@sha256:d118fc05cfa714a4577731384ec8b08fe7e70c203a6949b0581e0f6ebe54b0af
+    restart: unless-stopped
+    mem_limit: 900m
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "${PRIVATE_IP:?}:9200:9200"
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+  edge:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    mem_limit: 160m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+      - "${EDGE_LAN_IP:?}:443:9443"
+    volumes:
+      - ./edge:/etc/caddy:ro
+      - ${SHARED_DIR:-/opt/balearn/shared}/tls:/srv/balearn/tls:ro
+      - ${SHARED_DIR:-/opt/balearn/shared}/static:/srv/balearn/static:ro
+      - caddy-data:/data
+      - caddy-config:/config
+volumes:
+  mysql:
+  redis:
+  elasticsearch:
+  caddy-data:
+  caddy-config:

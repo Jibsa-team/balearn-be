@@ -1,0 +1,81 @@
+{
+    admin unix//tmp/balearn-caddy-admin.sock
+    auto_https disable_redirects
+}
+
+import upstreams.caddy
+
+https://hmwg.balearn.o-r.kr:9443 {
+    tls /srv/balearn/tls/fullchain.pem /srv/balearn/tls/privkey.pem
+    log {
+        output stdout
+        format filter {
+            wrap json
+            fields {
+                request>uri delete
+                request>headers delete
+                resp_headers delete
+            }
+        }
+    }
+    route {
+        log_append request_path {http.request.uri.path}
+        @management path /idp /idp/* /actuator /actuator/* /v3/api-docs* /swagger* /webjars/*
+        respond @management 404
+
+        handle_path /_next/static/* {
+            root * /srv/balearn/static
+            header Cache-Control "public, max-age=86400"
+            file_server
+        }
+
+        @socket path /ws /ws/*
+        handle @socket {
+            log_append balearn_backend {rp.upstream.host}
+            reverse_proxy {
+                import app_backends
+                lb_policy cookie balearn_sockjs
+                health_uri /actuator/health
+                health_interval 5s
+                health_timeout 2s
+                health_fails 2
+                stream_close_delay 30s
+            }
+        }
+
+        @api path /api /api/* /oauth2/* /login/oauth2/code/* /media/*
+        handle @api {
+            log_append balearn_backend {rp.upstream.host}
+            reverse_proxy {
+                import app_backends
+                lb_policy round_robin
+                health_uri /actuator/health
+                health_interval 5s
+                health_timeout 2s
+                health_fails 2
+                lb_try_duration 3s
+                lb_retry_match {
+                    method GET HEAD
+                }
+            }
+        }
+
+        handle {
+            log_append balearn_frontend {rp.upstream.host}
+            reverse_proxy {
+                import app_frontends
+                lb_policy cookie balearn_web {
+                    fallback round_robin
+                }
+                health_uri /
+                health_interval 5s
+                health_timeout 2s
+                health_fails 2
+                lb_try_duration 3s
+                lb_retry_match {
+                    method GET HEAD
+                }
+            }
+        }
+    }
+}

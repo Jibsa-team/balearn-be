@@ -1,0 +1,42 @@
+name: balearn-node
+services:
+  backend:
+    image: ${BALEARN_BACKEND_IMAGE:?}
+    restart: unless-stopped
+    mem_limit: 704m
+    stop_grace_period: 75s
+    ports:
+      - "${PRIVATE_IP:?}:8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev,cluster
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SERVER_SHUTDOWN: graceful
+      SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE: 60s
+      JAVA_TOOL_OPTIONS: "-Xms96m -Xmx480m"
+      BACKEND_URL: https://hmwg.balearn.o-r.kr:9443
+      FRONTEND_URL: https://hmwg.balearn.o-r.kr:9443
+      DATABASE_URL: jdbc:mysql://10.77.20.1:3306/${DATABASE_NAME:-balearn}?useSSL=false&allowPublicKeyRetrieval=true
+      DATABASE_USER: ${DATABASE_USER:-balearn}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?}
+      REDIS_HOST: 10.77.20.1
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?}
+      ES_URL: http://10.77.20.1:9200
+      JWT_SECRET: ${JWT_SECRET:?}
+      KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID:?}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET:?}
+      MEDIA_STORAGE_PROVIDER: local
+      MEDIA_LOCAL_DIRECTORY: /data/media
+    volumes:
+      - type: bind
+        source: /srv/balearn/media
+        target: /data/media
+        bind:
+          create_host_path: false
+  frontend:
+    image: ${BALEARN_FRONTEND_IMAGE:?}
+    restart: unless-stopped
+    mem_limit: 384m
+    stop_grace_period: 60s
+    ports:
+      - "${PRIVATE_IP:?}:3000:3000"

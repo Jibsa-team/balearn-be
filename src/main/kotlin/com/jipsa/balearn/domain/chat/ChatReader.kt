@@ -21,7 +21,7 @@ class ChatReader(
     }
 
     fun readInRedisBatch(): List<Chat> {
-        return redisRepository.getChatList(redisRepository.generateChatBatchKey())
+        return redisRepository.readPendingChatBatch(250)
     }
 
     fun readInElasticsearch(
